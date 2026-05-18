@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Land United FC — Challenges</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+/* ── CONFIG: paste your Supabase values in the <script> below ── */
+
+:root {
+  --navy:         #1e2157;
+  --navy-dark:    #12153a;
+  --navy-mid:     #252a6e;
+  --peach:        #e8a87c;
+  --peach-pale:   rgba(232,168,124,0.12);
+  --peach-light:  #f0c4a0;
+  --white:        #f5f5f2;
+  --muted:        rgba(245,245,242,0.52);
+  --card-bg:      rgba(255,255,255,0.06);
+  --card-border:  rgba(255,255,255,0.11);
+  --green:        #6ecf8a;
+  --green-bg:     rgba(110,207,138,0.12);
+  --green-border: rgba(110,207,138,0.28);
+  --danger:       #e06b5a;
+  --danger-bg:    rgba(224,107,90,0.12);
+  --danger-border:rgba(224,107,90,0.28);
+  --radius:       12px;
+  --radius-sm:    8px;
+  --font-d:       'Bebas Neue', sans-serif;
+  --font-b:       'DM Sans', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100vh;background:var(--navy-dark);color:var(--white);font-family:var(--font-b);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+
+/* ── LAYOUT ── */
+#app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+
+/* ── HEADER ── */
+.site-header{background:linear-gradient(160deg,#151840 0%,#1e2157 55%,#252a6e 100%);padding:20px 18px 0;border-bottom:3px solid var(--peach);position:relative;overflow:hidden;flex-shrink:0;}
+.site-header::before{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,rgba(232,168,124,.04) 0,rgba(232,168,124,.04) 1px,transparent 1px,transparent 48px),repeating-linear-gradient(0deg,rgba(232,168,124,.04) 0,rgba(232,168,124,.04) 1px,transparent 1px,transparent 48px);}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;}
+.header-crest{width:54px;height:54px;flex-shrink:0;border:2px solid var(--peach);border-radius:10px;overflow:hidden;}
+.header-crest img{width:100%;height:100%;object-fit:cover;}
+.header-title{font-family:var(--font-d);font-size:28px;letter-spacing:1px;line-height:1;}
+.header-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.week-badge{font-family:var(--font-d);font-size:15px;background:var(--peach);color:var(--navy-dark);padding:5px 12px;border-radius:var(--radius-sm);white-space:nowrap;}
+.signout-btn{background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-b);margin-top:4px;text-align:right;display:block;}
+
+.tab-nav{display:flex;margin-top:16px;}
+.tab-btn{flex:1;padding:10px 4px;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:var(--font-b);transition:color .15s,border-color .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.tab-btn.active{color:var(--peach);border-bottom-color:var(--peach);}
+.tab-btn svg{width:13px;height:13px;flex-shrink:0;}
+
+/* ── CONTENT ── */
+.tab-content{flex:1;padding:20px 16px;background:var(--navy-dark);}
+.view{display:none;}.view.active{display:block;}
+
+/* ── CARDS ── */
+.card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
+
+/* ── DEMO VIDEO ── */
+.demo-wrap{border-radius:var(--radius-sm);overflow:hidden;background:#000;margin-bottom:14px;border:1px solid var(--card-border);aspect-ratio:16/9;}
+.demo-wrap video{width:100%;height:100%;object-fit:cover;}
+.demo-label{font-size:11px;color:var(--peach);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+
+/* ── PILLS ── */
+.pill-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;}
+.pill{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;background:var(--peach-pale);border:1px solid rgba(232,168,124,.32);color:var(--peach-light);display:flex;align-items:center;gap:4px;}
+.pill.green{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+
+/* ── UPLOAD ── */
+.upload-zone{border:2px dashed rgba(232,168,124,.3);border-radius:var(--radius-sm);padding:26px 16px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;}
+.upload-zone:hover{border-color:var(--peach);background:var(--peach-pale);}
+.upload-zone .uicon{font-size:26px;display:block;margin-bottom:7px;}
+.upload-zone strong{font-size:13px;color:var(--white);display:block;}
+.upload-zone p{font-size:12px;color:var(--muted);margin-top:3px;}
+.video-preview{width:100%;aspect-ratio:16/9;border-radius:var(--radius-sm);background:#000;overflow:hidden;margin-bottom:8px;border:1px solid var(--card-border);}
+.video-preview video{width:100%;height:100%;object-fit:cover;}
+.remove-link{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--font-b);margin-bottom:4px;}
+
+/* ── BUTTONS ── */
+.btn-primary{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:12px;margin-top:12px;background:var(--peach);color:var(--navy-dark);font-family:var(--font-d);font-size:20px;letter-spacing:1px;border:none;border-radius:var(--radius-sm);cursor:pointer;transition:opacity .15s;}
+.btn-primary:hover{opacity:.87;}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+.btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:var(--navy-mid);border:1px solid var(--peach);color:var(--white);border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-b);}
+.btn-approve{padding:5px 11px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--font-b);}
+.btn-reject{padding:5px 9px;background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger-border);border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--font-b);}
+
+/* ── STATUS BOX ── */
+.status-box{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);margin-top:10px;}
+.status-box.pending{background:var(--peach-pale);border:1px solid rgba(232,168,124,.25);}
+.status-box.approved{background:var(--green-bg);border:1px solid var(--green-border);}
+.status-box.rejected{background:var(--danger-bg);border:1px solid var(--danger-border);}
+
+/* ── LEADERBOARD ── */
+.lb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.stat-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:13px 10px;text-align:center;}
+.stat-num{font-family:var(--font-d);font-size:28px;color:var(--peach);line-height:1;}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.lb-row{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:var(--radius-sm);margin-bottom:7px;background:var(--card-bg);border:1px solid var(--card-border);}
+.lb-row.gold{background:rgba(232,168,124,.1);border-color:rgba(232,168,124,.28);}
+.lb-rank{font-family:var(--font-d);font-size:22px;color:var(--muted);width:24px;text-align:center;flex-shrink:0;}
+.lb-rank.r1{color:#ffd700;}.lb-rank.r2{color:#c0c0c0;}.lb-rank.r3{color:#cd7f32;}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:12px;flex-shrink:0;}
+.lb-pts{font-family:var(--font-d);font-size:22px;color:var(--peach);flex-shrink:0;}
+.done-tag{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);font-size:11px;border-radius:20px;}
+
+/* ── FORMS ── */
+.field{margin-bottom:13px;}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;}
+.field input,.field textarea,.field select{width:100%;padding:10px 12px;background:rgba(255,255,255,.07);border:1px solid var(--card-border);border-radius:var(--radius-sm);color:var(--white);font-size:14px;font-family:var(--font-b);transition:border-color .15s;}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--peach);}
+.field textarea{resize:vertical;min-height:68px;}
+.pts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* ── PENDING ── */
+.pending-row{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-sm);margin-bottom:7px;transition:opacity .3s;}
+.pending-row.fading{opacity:.25;pointer-events:none;}
+.admin-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:5px;}
+.admin-section{margin-bottom:22px;}
+
+/* ── LOGIN ── */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#151840 0%,#1e2157 55%,#252a6e 100%);padding:20px;}
+.login-card{width:100%;max-width:320px;background:rgba(255,255,255,.05);border:1px solid var(--card-border);border-radius:16px;padding:30px 24px;text-align:center;}
+.login-crest{width:80px;height:80px;border-radius:13px;overflow:hidden;border:2px solid var(--peach);margin:0 auto 16px;}
+.login-crest img{width:100%;height:100%;object-fit:cover;}
+.login-title{font-family:var(--font-d);font-size:26px;letter-spacing:1px;margin-bottom:3px;}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:22px;}
+.login-error{font-size:12px;color:var(--danger);margin-top:10px;}
+
+/* ── TOAST ── */
+.toast{display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:var(--radius-sm);font-size:13px;margin-top:10px;background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);}
+
+/* ── LOADING ── */
+.spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(232,168,124,.2);border-top-color:var(--peach);animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-center{display:flex;justify-content:center;align-items:center;padding:40px;}
+
+/* ── MISC ── */
+.section-title{font-family:var(--font-d);font-size:24px;letter-spacing:.5px;margin-bottom:4px;}
+.section-desc{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:13px;}
+.flex-1{flex:1;min-width:0;}
+.text-muted{color:var(--muted);font-size:13px;}
+.mt-2{margin-top:14px;}
+.row{display:flex;align-items:center;gap:10px;}
+a.watch-link{font-size:11px;color:var(--peach);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px;}
+a.watch-link:hover{text-decoration:underline;}
+
+/* ── REJECT INLINE ── */
+.reject-form{display:flex;flex-direction:column;gap:5px;flex:1;}
+.reject-form input{padding:5px 8px;background:rgba(255,255,255,.07);border:1px solid var(--card-border);border-radius:6px;color:var(--white);font-size:12px;font-family:var(--font-b);}
+.reject-form input:focus{outline:none;border-color:var(--danger);}
+.reject-actions{display:flex;gap:6px;align-items:center;}
+.cancel-link{background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-b);}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     PASTE YOUR SUPABASE CREDENTIALS HERE
+     (Supabase dashboard → Settings → API)
+════════════════════════════════════════════════ -->
+<script>
+  const SUPABASE_URL  = 'https://vajcbpsohffoyitifcvh.supabase.co/rest/v1/'
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhamNicHNvaGZmb3lpdGlmY3ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMzU3NDQsImV4cCI6MjA5NDcxMTc0NH0.RrB5w-YflVtZyiGuyRzoF_J43x7jyDJNJNnrfow2NQ8'
+  // Crest image URL — after uploading crest to Supabase Storage,
+  // paste the public URL here:
+  const CREST_URL = 'https://vajcbpsohffoyitifcvh.supabase.co/storage/v1/object/sign/assets/land-united-crest.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jNmViNjFmMC0wNWM4LTQ3MWMtODU1Zi03ZGE0ZjMzNTQ3ZjAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhc3NldHMvbGFuZC11bml0ZWQtY3Jlc3Qud2VicCIsImlhdCI6MTc3OTE0NjEyMCwiZXhwIjoxOTM2ODI2MTIwfQ.Ne25jHraTHcqhAx3vd-5v2ZL4Mv-G4whxAtZzwOcsNk'
+</script>
+
+<!-- ═══ LOGIN ═══════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-crest"><img id="login-crest-img" src="" alt="Land United FC" /></div>
+    <div class="login-title">Land United FC</div>
+    <div class="login-sub">Sign in with your username &amp; PIN</div>
+    <div class="field" style="text-align:left">
+      <label>Username</label>
+      <input id="login-user" type="text" placeholder="e.g. marcus_r" autocapitalize="none" autocomplete="username" />
+    </div>
+    <div class="field" style="text-align:left">
+      <label>PIN</label>
+      <input id="login-pin" type="password" placeholder="4-digit PIN" maxlength="4" inputmode="numeric" autocomplete="current-password" />
+    </div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="login-err" style="display:none"></div>
+    <p style="font-size:11px;color:var(--muted);margin-top:18px;">Forgotten your PIN? Contact your coach.</p>
+  </div>
+</div>
+
+<!-- ═══ APP ══════════════════════════════════════ -->
+<div id="app" style="display:none">
+  <header class="site-header">
+    <div class="header-top">
+      <div style="display:flex;align-items:center;gap:13px;">
+        <div class="header-crest"><img id="header-crest-img" src="" alt="Land United FC" /></div>
+        <div>
+          <div class="header-title">Land United FC</div>
+          <div class="header-sub">Weekly squad challenges</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <div class="week-badge" id="week-badge">Week 1</div>
+        <button class="signout-btn" onclick="doSignOut()" id="user-label">Sign out</button>
+      </div>
+    </div>
+    <nav class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('challenge')" id="tab-challenge-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        This week
+      </button>
+      <button class="tab-btn" onclick="switchTab('leaderboard')" id="tab-leaderboard-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/></svg>
+        Leaderboard
+      </button>
+      <button class="tab-btn" onclick="switchTab('coach')" id="tab-coach-btn" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Coach
+      </button>
+    </nav>
+  </header>
+
+  <div class="tab-content">
+    <!-- CHALLENGE -->
+    <div class="view active" id="view-challenge">
+      <div id="challenge-content"><div class="loading-center"><div class="spinner"></div></div></div>
+    </div>
+    <!-- LEADERBOARD -->
+    <div class="view" id="view-leaderboard">
+      <div id="lb-content"><div class="loading-center"><div class="spinner"></div></div></div>
+    </div>
+    <!-- COACH -->
+    <div class="view" id="view-coach">
+      <div id="coach-content"><div class="loading-center"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   SUPABASE CLIENT
+═══════════════════════════════════════════════════════ */
+const { createClient } = supabase
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON)
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let currentSession = null
+let currentProfile = null
+let activeChallenge = null
+let mySubmission = null
+let selectedVideoFile = null
+
+/* ═══════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════ */
+document.getElementById('login-crest-img').src = CREST_URL
+document.getElementById('header-crest-img').src = CREST_URL
+
+sb.auth.getSession().then(({ data }) => {
+  if (data.session) bootApp(data.session)
+})
+sb.auth.onAuthStateChange((_e, session) => {
+  if (session && !currentSession) bootApp(session)
+  else if (!session) showLogin()
+})
+
+document.getElementById('login-pin').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin() })
+document.getElementById('login-user').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-pin').focus() })
+
+async function bootApp(session) {
+  currentSession = session
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single()
+  currentProfile = profile
+  document.getElementById('login-screen').style.display = 'none'
+  document.getElementById('app').style.display = 'flex'
+  document.getElementById('user-label').textContent = (profile?.display_name || 'Player') + ' · sign out'
+  document.getElementById('week-badge').textContent = getWeekLabel()
+  if (profile?.is_coach) document.getElementById('tab-coach-btn').style.display = ''
+  loadChallenge()
+}
+
+function showLogin() {
+  currentSession = null; currentProfile = null
+  document.getElementById('login-screen').style.display = 'flex'
+  document.getElementById('app').style.display = 'none'
+}
+
+/* ═══════════════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════════════ */
+async function doLogin() {
+  const user = document.getElementById('login-user').value.trim().toLowerCase()
+  const pin  = document.getElementById('login-pin').value.trim()
+  const err  = document.getElementById('login-err')
+  const btn  = document.getElementById('login-btn')
+  if (!user || pin.length < 4) { showErr(err, 'Enter your username and 4-digit PIN.'); return }
+  btn.disabled = true; btn.textContent = 'Signing in…'; err.style.display = 'none'
+  const email = user + '@landunited.internal'
+  const { error } = await sb.auth.signInWithPassword({ email, password: pin })
+  if (error) { showErr(err, 'Incorrect username or PIN.'); btn.disabled = false; btn.textContent = 'Sign In' }
+}
+
+async function doSignOut() {
+  await sb.auth.signOut()
+}
+
+/* ═══════════════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════════════ */
+function switchTab(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'))
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+  document.getElementById('view-' + name).classList.add('active')
+  document.getElementById('tab-' + name + '-btn').classList.add('active')
+  if (name === 'leaderboard') loadLeaderboard()
+  if (name === 'coach') loadCoachPanel()
+}
+
+/* ═══════════════════════════════════════════════════════
+   CHALLENGE TAB
+═══════════════════════════════════════════════════════ */
+async function loadChallenge() {
+  const el = document.getElementById('challenge-content')
+  el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>'
+  try {
+    const { data: c } = await sb.from('challenges').select('*').eq('is_active', true).limit(1).maybeSingle()
+    activeChallenge = c
+    if (!c) { el.innerHTML = '<p class="text-muted" style="text-align:center;padding-top:30px">No active challenge right now.<br>Check back Monday morning!</p>'; return }
+    const { data: sub } = await sb.from('submissions').select('*').eq('challenge_id', c.id).eq('player_id', currentSession.user.id).maybeSingle()
+    mySubmission = sub
+    renderChallenge(el, c, sub)
+  } catch(e) { el.innerHTML = '<p class="text-muted">Could not load challenge.</p>'; console.error(e) }
+}
+
+function renderChallenge(el, c, sub) {
+  const totalMax = c.flat_points + c.day1_bonus
+  el.innerHTML = `
+    <div class="card">
+      <div class="section-title">${esc(c.title)}</div>
+      <p class="section-desc">${esc(c.description)}</p>
+      ${c.demo_video_url ? `
+        <div class="demo-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.227A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+          Coach demo — watch before you attempt
+        </div>
+        <div class="demo-wrap"><video src="${c.demo_video_url}" controls playsinline preload="metadata"></video></div>
+      ` : ''}
+      <div class="pill-row">
+        <span class="pill">⭐ ${c.flat_points} pts on completion</span>
+        ${c.day1_bonus > 0 ? `<span class="pill green">+${c.day1_bonus} pts if uploaded day 1</span>` : ''}
+        ${c.day2_bonus > 0 ? `<span class="pill green">+${c.day2_bonus} pts if uploaded day 2</span>` : ''}
+        ${c.day3_bonus > 0 ? `<span class="pill green">+${c.day3_bonus} pts if uploaded day 3</span>` : ''}
+      </div>
+      <div id="submission-area">${renderSubmissionArea(sub, c)}</div>
+    </div>
+    <p class="text-muted" style="text-align:center;font-size:12px;">Max possible this week: ${totalMax} pts</p>
+  `
+}
+
+function renderSubmissionArea(sub, c) {
+  if (!sub) return `
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+      <span class="uicon">🎥</span>
+      <strong>Tap to choose your video</strong>
+      <p>MP4 or MOV · max 200MB · under 2 min</p>
+    </div>
+    <div id="video-preview-wrap" style="display:none">
+      <div class="video-preview"><video id="preview-video" controls playsinline></video></div>
+      <button class="remove-link" onclick="clearVideo()">✕ Remove and choose different video</button>
+    </div>
+    <input id="file-input" type="file" accept="video/mp4,video/mov,video/quicktime,video/*" style="display:none" onchange="handleFileSelect(this)" />
+    <button class="btn-primary" id="submit-btn" onclick="submitVideo()" disabled>Submit Video for Review</button>
+    <div id="upload-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>
+  `
+  const bonus = calcBonus(c, sub.submitted_at)
+  const submittedFmt = new Date(sub.submitted_at).toLocaleDateString('en-GB', { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })
+  if (sub.status === 'pending') return `
+    <div class="status-box pending">
+      <div class="flex-1">
+        <div style="font-weight:500;font-size:14px;">Video submitted — awaiting coach review</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Submitted ${submittedFmt}${bonus > 0 ? ` · <span style="color:var(--green)">Early bird +${bonus} pts pending</span>` : ''}</div>
+      </div>
+    </div>`
+  if (sub.status === 'approved') return `
+    <div class="status-box approved">
+      <div class="flex-1">
+        <div style="font-weight:500;font-size:14px;color:var(--green)">✓ Approved! +${sub.points_awarded} pts added to your total</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">${c.flat_points} base${bonus > 0 ? ` + ${bonus} early bird bonus` : ''}</div>
+      </div>
+    </div>`
+  return `
+    <div class="status-box rejected">
+      <div class="flex-1">
+        <div style="font-weight:500;font-size:14px;color:var(--danger)">✗ Not approved this time</div>
+        ${sub.rejection_reason ? `<div style="font-size:12px;color:var(--muted);margin-top:3px;">Coach note: ${esc(sub.rejection_reason)}</div>` : ''}
+      </div>
+    </div>`
+}
+
+function handleFileSelect(input) {
+  const f = input.files?.[0]
+  if (!f) return
+  selectedVideoFile = f
+  const zone = document.getElementById('upload-zone')
+  const preview = document.getElementById('video-preview-wrap')
+  const video = document.getElementById('preview-video')
+  if (zone) zone.style.display = 'none'
+  if (preview) preview.style.display = 'block'
+  if (video) video.src = URL.createObjectURL(f)
+  const btn = document.getElementById('submit-btn')
+  if (btn) btn.disabled = false
+}
+
+function clearVideo() {
+  selectedVideoFile = null
+  document.getElementById('upload-zone').style.display = 'block'
+  document.getElementById('video-preview-wrap').style.display = 'none'
+  document.getElementById('preview-video').src = ''
+  document.getElementById('submit-btn').disabled = true
+  document.getElementById('file-input').value = ''
+}
+
+async function submitVideo() {
+  if (!selectedVideoFile || !activeChallenge) return
+  const btn = document.getElementById('submit-btn')
+  const errEl = document.getElementById('upload-error')
+  btn.disabled = true; btn.textContent = 'Uploading…'; errEl.style.display = 'none'
+  try {
+    const ext = selectedVideoFile.name.split('.').pop()
+    const path = `submissions/${activeChallenge.id}/${currentSession.user.id}-${Date.now()}.${ext}`
+    const { error: upErr } = await sb.storage.from('videos').upload(path, selectedVideoFile, { cacheControl:'3600' })
+    if (upErr) throw upErr
+    const { data: urlData } = sb.storage.from('videos').getPublicUrl(path)
+    const { data: sub, error: subErr } = await sb.from('submissions').insert({
+      challenge_id: activeChallenge.id,
+      player_id: currentSession.user.id,
+      video_url: urlData.publicUrl,
+      status: 'pending',
+      submitted_at: new Date().toISOString()
+    }).select().single()
+    if (subErr) throw subErr
+    mySubmission = sub
+    selectedVideoFile = null
+    document.getElementById('submission-area').innerHTML = renderSubmissionArea(sub, activeChallenge)
+  } catch(e) {
+    errEl.style.display = 'block'; errEl.textContent = 'Upload failed — check your connection and try again.'
+    btn.disabled = false; btn.textContent = 'Submit Video for Review'
+    console.error(e)
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   LEADERBOARD TAB
+═══════════════════════════════════════════════════════ */
+async function loadLeaderboard() {
+  const el = document.getElementById('lb-content')
+  el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>'
+  try {
+    const { data: players } = await sb.from('profiles').select('id,display_name,total_points,current_streak,avatar_color').eq('is_coach', false).order('total_points', { ascending: false })
+    const total = players.length
+    const onStreak = players.filter(p => p.current_streak > 0).length
+    const pct = total > 0 ? Math.round(onStreak / total * 100) : 0
+    const AVATAR_COLORS = ['#3a5bbf','#bf5a3a','#3abf7a','#bf3a7a','#7a3abf','#3a9bbf','#bfaa3a','#bf3a3a','#3abfbf','#7abf3a','#bf7a3a','#3a3abf']
+    const rows = players.map((p, i) => {
+      const rc = i===0?'r1':i===1?'r2':i===2?'r3':''
+      const gold = i < 3 ? ' gold' : ''
+      const col = p.avatar_color || AVATAR_COLORS[i % AVATAR_COLORS.length]
+      const ini = p.display_name.split(' ').map(x=>x[0]).join('').toUpperCase()
+      const streak = p.current_streak > 0 ? `<div style="font-size:11px;color:var(--green)">🔥 ${p.current_streak} week streak</div>` : ''
+      return `<div class="lb-row${gold}">
+        <div class="lb-rank ${rc}">${i+1}</div>
+        <div class="avatar" style="background:${col}33;color:${col};border:1px solid ${col}55">${ini}</div>
+        <div class="flex-1"><div style="font-size:14px;font-weight:500">${esc(p.display_name)}</div>${streak}</div>
+        <div class="lb-pts">${p.total_points}</div>
+      </div>`
+    }).join('')
+    el.innerHTML = `
+      <div class="lb-stats">
+        <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Players</div></div>
+        <div class="stat-card"><div class="stat-num">${onStreak}</div><div class="stat-lbl">On a streak</div></div>
+        <div class="stat-card"><div class="stat-num">${pct}%</div><div class="stat-lbl">Participation</div></div>
+      </div>
+      ${rows || '<p class="text-muted" style="text-align:center;padding-top:20px">No players yet.</p>'}
+    `
+  } catch(e) { el.innerHTML = '<p class="text-muted">Could not load leaderboard.</p>'; console.error(e) }
+}
+
+/* ═══════════════════════════════════════════════════════
+   COACH TAB
+═══════════════════════════════════════════════════════ */
+let coachDemoFile = null
+
+async function loadCoachPanel() {
+  const el = document.getElementById('coach-content')
+  el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>'
+  try {
+    const { data: pending } = await sb.from('submissions')
+      .select('*, profiles(display_name), challenges(title, flat_points, day1_bonus, day2_bonus, day3_bonus, created_at)')
+      .eq('status', 'pending')
+      .order('submitted_at', { ascending: true })
+    el.innerHTML = buildCoachHTML(pending || [])
+    attachCoachEvents()
+  } catch(e) { el.innerHTML = '<p class="text-muted">Could not load coach panel.</p>'; console.error(e) }
+}
+
+function buildCoachHTML(pending) {
+  const pendingRows = pending.length === 0
+    ? '<p style="font-size:13px;color:var(--muted);padding-bottom:4px">All caught up — no pending submissions.</p>'
+    : pending.map(sub => {
+        const timeFmt = new Date(sub.submitted_at).toLocaleDateString('en-GB', { weekday:'short', hour:'2-digit', minute:'2-digit' })
+        const bonus = calcBonus(sub.challenges, sub.submitted_at)
+        const total = (sub.challenges?.flat_points || 50) + bonus
+        return `<div class="pending-row" id="pr-${sub.id}">
+          <div class="flex-1">
+            <div style="font-size:13px;font-weight:500">${esc(sub.profiles?.display_name || '—')}</div>
+            <div style="font-size:11px;color:var(--muted)">${esc(sub.challenges?.title || '—')} · ${timeFmt}</div>
+            <a class="watch-link" href="${sub.video_url}" target="_blank" rel="noreferrer">Watch video ↗</a>
+          </div>
+          <div id="actions-${sub.id}" style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn-approve" onclick="approveSub('${sub.id}', ${total})">✓ Approve (+${total})</button>
+            <button class="btn-reject" onclick="showRejectForm('${sub.id}')">✕</button>
+          </div>
+        </div>`
+      }).join('')
+
+  return `
+  <div class="admin-section">
+    <div class="admin-label">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Pending approvals ${pending.length > 0 ? `(${pending.length})` : ''}
+    </div>
+    <div id="pending-list">${pendingRows}</div>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-label">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Post new challenge
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="field"><label>Challenge title</label><input id="c-title" placeholder="e.g. Juggling Gauntlet" /></div>
+      <div class="field"><label>Description — what players need to do</label><textarea id="c-desc" rows="3" placeholder="Describe the challenge clearly..."></textarea></div>
+      <div class="field">
+        <label>Your demo video (players see this before attempting)</label>
+        <div id="demo-upload-zone" class="upload-zone" style="padding:16px" onclick="document.getElementById('demo-file-input').click()">
+          <span class="uicon">📹</span>
+          <strong style="font-size:13px">Upload your demo clip</strong>
+          <p>Players watch this before they attempt</p>
+        </div>
+        <div id="demo-preview-wrap" style="display:none">
+          <div class="video-preview"><video id="demo-preview-video" controls playsinline></video></div>
+          <button class="remove-link" onclick="clearDemo()">✕ Remove demo video</button>
+        </div>
+        <input id="demo-file-input" type="file" accept="video/*" style="display:none" onchange="handleDemoSelect(this)" />
+      </div>
+      <div class="admin-label" style="margin-top:4px">Point values</div>
+      <div class="pts-grid" style="margin-bottom:12px">
+        <div class="field" style="margin-bottom:0"><label>Completion</label><input id="c-flat" type="number" value="50" min="0" /></div>
+        <div class="field" style="margin-bottom:0"><label>Day 1 bonus</label><input id="c-d1" type="number" value="20" min="0" /></div>
+        <div class="field" style="margin-bottom:0"><label>Day 2 bonus</label><input id="c-d2" type="number" value="10" min="0" /></div>
+        <div class="field" style="margin-bottom:0"><label>Day 3 bonus</label><input id="c-d3" type="number" value="5" min="0" /></div>
+      </div>
+      <button class="btn-primary" id="post-btn" onclick="postChallenge()">🚀 Publish Challenge Now</button>
+      <div id="post-toast" style="display:none" class="toast">✓ Challenge is live for the squad!</div>
+      <div id="post-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-label">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      Add player to squad
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="field"><label>Display name</label><input id="p-name" placeholder="e.g. Marcus Rodriguez" /></div>
+      <div class="pts-grid">
+        <div class="field" style="margin-bottom:0"><label>Username</label><input id="p-user" placeholder="marcus_r" autocapitalize="none" /></div>
+        <div class="field" style="margin-bottom:0"><label>PIN (4 digits)</label><input id="p-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" /></div>
+      </div>
+      <button class="btn-primary" id="add-player-btn" onclick="addPlayer()" style="margin-top:14px">+ Add Player</button>
+      <div id="player-toast" style="display:none" class="toast">✓ Player added! Share their username and PIN.</div>
+      <div id="player-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div>
+    </div>
+  </div>
+  `
+}
+
+function attachCoachEvents() { /* events are inline */ }
+
+/* ── PENDING ACTIONS ── */
+async function approveSub(subId, points) {
+  const row = document.getElementById('pr-' + subId)
+  if (row) row.classList.add('fading')
+  try {
+    // Get player_id from submission
+    const { data: sub } = await sb.from('submissions').select('player_id').eq('id', subId).single()
+    await sb.from('submissions').update({ status:'approved', points_awarded:points, reviewed_at:new Date().toISOString() }).eq('id', subId)
+    await sb.rpc('add_points', { player_id: sub.player_id, amount: points })
+    setTimeout(() => { if (row) row.remove() }, 350)
+  } catch(e) { if (row) row.classList.remove('fading'); console.error(e) }
+}
+
+function showRejectForm(subId) {
+  const actionsEl = document.getElementById('actions-' + subId)
+  actionsEl.innerHTML = `
+    <div class="reject-form">
+      <input id="reason-${subId}" placeholder="Reason (optional)" />
+      <div class="reject-actions">
+        <button class="btn-reject" onclick="confirmReject('${subId}')">Confirm reject</button>
+        <button class="cancel-link" onclick="cancelReject('${subId}')">Cancel</button>
+      </div>
+    </div>`
+}
+
+function cancelReject(subId) {
+  const el = document.getElementById('actions-' + subId)
+  el.innerHTML = `
+    <button class="btn-approve" onclick="approveSub('${subId}', 50)">✓ Approve</button>
+    <button class="btn-reject" onclick="showRejectForm('${subId}')">✕</button>`
+}
+
+async function confirmReject(subId) {
+  const reason = document.getElementById('reason-' + subId)?.value || ''
+  const row = document.getElementById('pr-' + subId)
+  if (row) row.classList.add('fading')
+  try {
+    await sb.from('submissions').update({ status:'rejected', rejection_reason:reason, reviewed_at:new Date().toISOString() }).eq('id', subId)
+    setTimeout(() => { if (row) row.remove() }, 350)
+  } catch(e) { if (row) row.classList.remove('fading'); console.error(e) }
+}
+
+/* ── DEMO VIDEO ── */
+function handleDemoSelect(input) {
+  const f = input.files?.[0]
+  if (!f) return
+  coachDemoFile = f
+  document.getElementById('demo-upload-zone').style.display = 'none'
+  document.getElementById('demo-preview-wrap').style.display = 'block'
+  document.getElementById('demo-preview-video').src = URL.createObjectURL(f)
+}
+
+function clearDemo() {
+  coachDemoFile = null
+  document.getElementById('demo-upload-zone').style.display = 'block'
+  document.getElementById('demo-preview-wrap').style.display = 'none'
+  document.getElementById('demo-preview-video').src = ''
+  document.getElementById('demo-file-input').value = ''
+}
+
+/* ── POST CHALLENGE ── */
+async function postChallenge() {
+  const title = document.getElementById('c-title').value.trim()
+  const desc  = document.getElementById('c-desc').value.trim()
+  const flat  = parseInt(document.getElementById('c-flat').value) || 50
+  const d1    = parseInt(document.getElementById('c-d1').value) || 0
+  const d2    = parseInt(document.getElementById('c-d2').value) || 0
+  const d3    = parseInt(document.getElementById('c-d3').value) || 0
+  const errEl = document.getElementById('post-error')
+  if (!title || !desc) { errEl.style.display='block'; errEl.textContent='Please fill in the title and description.'; return }
+  const btn = document.getElementById('post-btn')
+  btn.disabled = true; btn.textContent = 'Publishing…'; errEl.style.display = 'none'
+  try {
+    // Deactivate all existing challenges
+    await sb.from('challenges').update({ is_active: false }).eq('is_active', true)
+    // Create new
+    const { data: c, error: cErr } = await sb.from('challenges').insert({
+      title, description: desc, flat_points: flat, day1_bonus: d1, day2_bonus: d2, day3_bonus: d3, is_active: true
+    }).select().single()
+    if (cErr) throw cErr
+    // Upload demo video if provided
+    if (coachDemoFile) {
+      const ext = coachDemoFile.name.split('.').pop()
+      const path = `demos/${c.id}-demo.${ext}`
+      const { error: upErr } = await sb.storage.from('videos').upload(path, coachDemoFile, { cacheControl:'3600', upsert:true })
+      if (!upErr) {
+        const { data: urlData } = sb.storage.from('videos').getPublicUrl(path)
+        await sb.from('challenges').update({ demo_video_url: urlData.publicUrl }).eq('id', c.id)
+      }
+    }
+    activeChallenge = c
+    showToast('post-toast')
+    document.getElementById('c-title').value = ''
+    document.getElementById('c-desc').value = ''
+    clearDemo()
+    btn.disabled = false; btn.textContent = '🚀 Publish Challenge Now'
+  } catch(e) {
+    errEl.style.display='block'; errEl.textContent='Something went wrong. Try again.'
+    btn.disabled=false; btn.textContent='🚀 Publish Challenge Now'
+    console.error(e)
+  }
+}
+
+/* ── ADD PLAYER ── */
+async function addPlayer() {
+  const name = document.getElementById('p-name').value.trim()
+  const user = document.getElementById('p-user').value.trim().toLowerCase()
+  const pin  = document.getElementById('p-pin').value.trim()
+  const errEl = document.getElementById('player-error')
+  if (!name || !user || pin.length !== 4) { errEl.style.display='block'; errEl.textContent='Fill in all fields. PIN must be exactly 4 digits.'; return }
+  const btn = document.getElementById('add-player-btn')
+  btn.disabled=true; btn.textContent='Adding…'; errEl.style.display='none'
+  // NOTE: Creating auth users requires the service role key.
+  // This calls a Postgres function that you set up in Supabase.
+  // See README for the Edge Function approach.
+  try {
+    const { error } = await sb.rpc('create_player', { p_display_name: name, p_username: user, p_pin: pin })
+    if (error) throw error
+    document.getElementById('p-name').value = ''
+    document.getElementById('p-user').value = ''
+    document.getElementById('p-pin').value = ''
+    showToast('player-toast')
+    btn.disabled=false; btn.textContent='+ Add Player'
+  } catch(e) {
+    errEl.style.display='block'; errEl.textContent='Could not add player. They may need to be created via the Supabase dashboard instead.'
+    btn.disabled=false; btn.textContent='+ Add Player'
+    console.error(e)
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════ */
+function calcBonus(c, submittedAt) {
+  if (!c || !submittedAt) return 0
+  const h = (new Date(submittedAt) - new Date(c.created_at)) / 3600000
+  if (h <= 24) return c.day1_bonus || 0
+  if (h <= 48) return c.day2_bonus || 0
+  if (h <= 72) return c.day3_bonus || 0
+  return 0
+}
+
+function getWeekLabel() {
+  const start = new Date('2025-01-06')
+  const week = Math.max(1, Math.floor((new Date() - start) / (7*24*3600*1000)) + 1)
+  return 'Week ' + week
+}
+
+function esc(str) {
+  if (!str) return ''
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+}
+
+function showErr(el, msg) { el.style.display='block'; el.textContent=msg }
+
+function showToast(id) {
+  const t = document.getElementById(id)
+  t.style.display='flex'
+  setTimeout(() => t.style.display='none', 3500)
+}
+</script>
+
+</body>
+</html>
