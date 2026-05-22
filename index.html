@@ -477,8 +477,12 @@ function buildCoachHTML(pending) {
         <div class="field" style="margin-bottom:0"><label>Day 2 bonus</label><input id="c-d2" type="number" value="10" min="0" /></div>
         <div class="field" style="margin-bottom:0"><label>Day 3 bonus</label><input id="c-d3" type="number" value="5" min="0" /></div>
       </div>
-      <button class="btn-primary" id="post-btn" onclick="postChallenge()">🚀 Publish Challenge Now</button>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn-primary" id="post-btn" onclick="postChallenge(false)" style="margin-top:0">🚀 Publish Now</button>
+        <button class="btn-primary" id="schedule-btn" onclick="postChallenge(true)" style="margin-top:0;background:var(--navy-mid);border:1px solid var(--peach);color:var(--white);font-size:16px">📅 Schedule Monday 9am</button>
+      </div>
       <div id="post-toast" style="display:none" class="toast">✓ Challenge is live for the squad!</div>
+      <div id="schedule-toast" style="display:none" class="toast">📅 Scheduled — goes live Monday at 9am automatically!</div>
       <div id="post-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div>
     </div>
   </div>
@@ -561,7 +565,17 @@ async function confirmReject(subId) {
   } catch(e) { if(row) row.classList.remove('fading'); console.error(e) }
 }
 
-async function postChallenge() {
+function getNextMondayNineAM() {
+  const now = new Date()
+  const day = now.getDay() // 0=Sun, 1=Mon...
+  const daysUntilMonday = day === 1 ? 7 : (8 - day) % 7 || 7
+  const nextMonday = new Date(now)
+  nextMonday.setDate(now.getDate() + daysUntilMonday)
+  nextMonday.setHours(14, 0, 0, 0) // 9am EST = 14:00 UTC
+  return nextMonday.toISOString()
+}
+
+async function postChallenge(schedule) {
   const title=document.getElementById('c-title').value.trim()
   const desc=document.getElementById('c-desc').value.trim()
   const flat=parseInt(document.getElementById('c-flat').value)||50
@@ -570,25 +584,46 @@ async function postChallenge() {
   const d3=parseInt(document.getElementById('c-d3').value)||0
   const errEl=document.getElementById('post-error')
   if (!title||!desc) { errEl.style.display='block'; errEl.textContent='Fill in the title and description.'; return }
-  const btn=document.getElementById('post-btn')
-  btn.disabled=true; btn.textContent='Publishing…'; errEl.style.display='none'
+  const postBtn=document.getElementById('post-btn')
+  const schedBtn=document.getElementById('schedule-btn')
+  postBtn.disabled=true; schedBtn.disabled=true; errEl.style.display='none'
+  if (schedule) { schedBtn.textContent='Scheduling…' } else { postBtn.textContent='Publishing…' }
   try {
-    await sb.from('challenges').update({is_active:false}).eq('is_active',true)
     const demoUrl=coachYouTubeId?`https://www.youtube.com/watch?v=${coachYouTubeId}`:null
-    const { data: c, error: cErr }=await sb.from('challenges').insert({
-      title, description:desc, demo_video_url:demoUrl,
-      flat_points:flat, day1_bonus:d1, day2_bonus:d2, day3_bonus:d3, is_active:true
-    }).select().single()
-    if (cErr) throw cErr
-    activeChallenge=c
-    showToast('post-toast')
+    if (schedule) {
+      // Save as scheduled — pg_cron will activate it Monday 9am
+      const scheduledFor = getNextMondayNineAM()
+      const { error: cErr }=await sb.from('challenges').insert({
+        title, description:desc, demo_video_url:demoUrl,
+        flat_points:flat, day1_bonus:d1, day2_bonus:d2, day3_bonus:d3,
+        is_active:false, scheduled_for:scheduledFor
+      })
+      if (cErr) throw cErr
+      showToast('schedule-toast')
+    } else {
+      // Publish immediately
+      await sb.from('challenges').update({is_active:false}).eq('is_active',true)
+      const { data: c, error: cErr }=await sb.from('challenges').insert({
+        title, description:desc, demo_video_url:demoUrl,
+        flat_points:flat, day1_bonus:d1, day2_bonus:d2, day3_bonus:d3,
+        is_active:true, scheduled_for:null
+      }).select().single()
+      if (cErr) throw cErr
+      activeChallenge=c
+      showToast('post-toast')
+    }
     document.getElementById('c-title').value=''
     document.getElementById('c-desc').value=''
     clearCoachYT()
-    btn.disabled=false; btn.textContent='🚀 Publish Challenge Now'
+    postBtn.disabled=false; schedBtn.disabled=false
+    postBtn.textContent='🚀 Publish Now'
+    schedBtn.textContent='📅 Schedule Monday 9am'
   } catch(e) {
     errEl.style.display='block'; errEl.textContent='Something went wrong. Try again.'
-    btn.disabled=false; btn.textContent='🚀 Publish Challenge Now'; console.error(e)
+    postBtn.disabled=false; schedBtn.disabled=false
+    postBtn.textContent='🚀 Publish Now'
+    schedBtn.textContent='📅 Schedule Monday 9am'
+    console.error(e)
   }
 }
 
