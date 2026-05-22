@@ -170,47 +170,21 @@ a.watch-yt:hover{text-decoration:underline;}
       <button class="tab-btn" onclick="switchTab('leaderboard')" id="tab-leaderboard-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/></svg>Leaderboard
       </button>
+      <button class="tab-btn" onclick="switchTab('rules')" id="tab-rules-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Points
+      </button>
       <button class="tab-btn" onclick="switchTab('coach')" id="tab-coach-btn" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Coach
       </button>
     </nav>
   </header>
-  <div class="rules-bar">
-    <div class="rules-title">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      How points work
-    </div>
-    <div class="rules-grid">
-      <div class="rules-section">
-        <div class="rules-section-title">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          Weekly challenge
-        </div>
-        <div class="rules-row"><span class="rules-label">Complete challenge</span><span class="rules-pts">50 pts</span></div>
-        <div class="rules-divider"></div>
-        <div class="rules-row"><span class="rules-label">&#127941; 1st to submit</span><span class="rules-pts">+20 pts</span></div>
-        <div class="rules-row"><span class="rules-label">&#129352; 2nd to submit</span><span class="rules-pts">+15 pts</span></div>
-        <div class="rules-row"><span class="rules-label">&#129353; 3rd to submit</span><span class="rules-pts">+10 pts</span></div>
-        <div class="rules-row"><span class="rules-label">4th to submit</span><span class="rules-pts">+5 pts</span></div>
-      </div>
-      <div class="rules-section">
-        <div class="rules-section-title">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Daily challenge
-        </div>
-        <div class="rules-row"><span class="rules-label">Complete session</span><span class="rules-pts">10 pts</span></div>
-        <div class="rules-divider"></div>
-        <div class="rules-row"><span class="rules-label">&#128293; Every 5 days</span><span class="rules-pts">+10 pts</span></div>
-        <div class="rules-row" style="margin-top:6px"><span class="rules-label" style="font-size:11px;color:var(--muted);line-height:1.4">500 passes each foot against a wall. Film &amp; submit daily.</span></div>
-      </div>
-    </div>
-  </div>
   <div class="tab-content">
     <div class="view active" id="view-challenge"><div id="challenge-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
     <div class="view" id="view-daily"><div id="daily-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
     <div class="view" id="view-leaderboard"><div id="lb-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
     <div class="view" id="view-coach"><div id="coach-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
     <div class="view" id="view-stats"><div id="stats-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
+    <div class="view" id="view-rules"><div id="rules-content"></div></div>
   </div>
 </div>
 
@@ -269,6 +243,7 @@ function switchTab(name){
   if(name==='coach') loadCoachPanel()
   if(name==='daily') loadDaily()
   if(name==='stats'){if(countdownInterval){clearInterval(countdownInterval);countdownInterval=null}}
+  if(name==='rules') renderRules()
   if(name==='challenge') {
     if(currentProfile?.is_viewer) loadViewerChallenge()
     else loadChallenge()
@@ -679,6 +654,63 @@ async function showStats(playerId,displayName,avatarColor){
     +(weekRows?'<div class="admin-label" style="margin-bottom:8px">Recent weekly challenges</div>'+weekRows:'')
     +(dailyRows?'<div class="admin-label" style="margin-top:14px;margin-bottom:8px">Recent daily sessions</div>'+dailyRows:'')
   }catch(e){el.innerHTML='<p class="text-muted">Could not load stats.</p>';console.error(e)}
+}
+
+/* RULES PAGE */
+function renderRules(){
+  document.getElementById('rules-content').innerHTML=`
+    <div style="padding:6px 0 18px">
+      <div style="font-family:var(--font-d);font-size:26px;letter-spacing:.5px;margin-bottom:4px">How Points Work</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Everything you need to know about earning points this season.</p>
+
+      <div class="card" style="margin-bottom:12px">
+        <div style="font-family:var(--font-d);font-size:18px;letter-spacing:.5px;color:var(--peach);margin-bottom:12px;display:flex;align-items:center;gap:7px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Weekly Challenge
+        </div>
+        <div class="rules-row"><span class="rules-label">Complete the challenge</span><span class="rules-pts">50 pts</span></div>
+        <div class="rules-divider"></div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:8px">Bonus points for being first to submit — it pays to be quick!</p>
+        <div class="rules-row"><span class="rules-label">&#127941; 1st player to submit</span><span class="rules-pts" style="color:var(--green)">+20 pts</span></div>
+        <div class="rules-row"><span class="rules-label">&#129352; 2nd player to submit</span><span class="rules-pts" style="color:var(--green)">+15 pts</span></div>
+        <div class="rules-row"><span class="rules-label">&#129353; 3rd player to submit</span><span class="rules-pts" style="color:var(--green)">+10 pts</span></div>
+        <div class="rules-row"><span class="rules-label">4th player to submit</span><span class="rules-pts" style="color:var(--green)">+5 pts</span></div>
+        <div class="rules-divider"></div>
+        <div style="background:var(--peach-pale);border:1px solid rgba(232,168,124,.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.6">
+          &#128274; Max possible per week: <strong style="color:var(--white)">70 pts</strong> (50 base + 20 for 1st place)
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div style="font-family:var(--font-d);font-size:18px;letter-spacing:.5px;color:var(--peach);margin-bottom:12px;display:flex;align-items:center;gap:7px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Daily Challenge
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">500 passes with your right foot + 500 with your left foot against a wall — 1000 passes total. Film the full session and submit every day.</p>
+        <div class="rules-row"><span class="rules-label">Complete a daily session</span><span class="rules-pts">10 pts</span></div>
+        <div class="rules-divider"></div>
+        <div class="rules-row"><span class="rules-label">&#128293; 5-day streak bonus</span><span class="rules-pts" style="color:var(--green)">+10 pts</span></div>
+        <p style="font-size:12px;color:var(--muted);margin-top:6px">Complete 5 days in a row and earn an automatic bonus on top of your daily points. Keep the streak going!</p>
+        <div class="rules-divider"></div>
+        <div style="background:var(--peach-pale);border:1px solid rgba(232,168,124,.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.6">
+          &#128197; If you complete every day for a week: <strong style="color:var(--white)">70+ pts</strong> from daily alone
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-family:var(--font-d);font-size:18px;letter-spacing:.5px;color:var(--peach);margin-bottom:12px;display:flex;align-items:center;gap:7px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/></svg>
+          Tips to maximise your points
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:16px;flex-shrink:0">&#9889;</span><span style="font-size:13px;color:var(--muted)">Submit your weekly challenge as soon as possible — the earlier you submit, the bigger the bonus.</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:16px;flex-shrink:0">&#128293;</span><span style="font-size:13px;color:var(--muted)">Do the daily challenge every single day. A 5-day streak earns you an automatic bonus.</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:16px;flex-shrink:0">&#127916;</span><span style="font-size:13px;color:var(--muted)">Upload your video to YouTube as unlisted, then paste the link. Coach reviews and approves it.</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:16px;flex-shrink:0">&#127942;</span><span style="font-size:13px;color:var(--muted)">Check the leaderboard to see where you stand — and tap any player to see their full stats.</span></div>
+        </div>
+      </div>
+    </div>
+  `
 }
 
 /* HELPERS */
