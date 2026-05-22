@@ -106,6 +106,16 @@ a.watch-yt:hover{text-decoration:underline;}
 .daily-banner{background:linear-gradient(135deg,rgba(90,140,232,0.15),rgba(90,140,232,0.05));border:1px solid rgba(90,140,232,0.3);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
 .daily-streak-num{font-family:var(--font-d);font-size:36px;color:#8ab4f8;line-height:1;flex-shrink:0;}
 .streak-toast{background:rgba(255,200,60,0.15);border:1px solid rgba(255,200,60,0.35);color:#ffd700;}
+.rules-bar{background:linear-gradient(135deg,rgba(30,33,87,0.95),rgba(37,42,110,0.95));border-bottom:1px solid var(--card-border);padding:14px 16px;}
+.rules-title{font-family:var(--font-d);font-size:16px;letter-spacing:.5px;color:var(--peach);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.rules-section{background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:10px 12px;}
+.rules-section-title{font-size:11px;font-weight:500;color:var(--peach);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;display:flex;align-items:center;gap:4px;}
+.rules-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.rules-row:last-child{margin-bottom:0;}
+.rules-label{font-size:12px;color:var(--muted);}
+.rules-pts{font-family:var(--font-d);font-size:16px;color:var(--white);}
+.rules-divider{height:1px;background:var(--card-border);margin:7px 0;}
 .countdown-box{background:linear-gradient(135deg,rgba(30,33,87,0.9),rgba(37,42,110,0.9));border:1px solid var(--peach);border-radius:var(--radius);padding:16px 18px;margin-bottom:14px;text-align:center;}
 .countdown-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
 .countdown-timer{display:flex;justify-content:center;gap:12px;}
@@ -165,6 +175,36 @@ a.watch-yt:hover{text-decoration:underline;}
       </button>
     </nav>
   </header>
+  <div class="rules-bar">
+    <div class="rules-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      How points work
+    </div>
+    <div class="rules-grid">
+      <div class="rules-section">
+        <div class="rules-section-title">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Weekly challenge
+        </div>
+        <div class="rules-row"><span class="rules-label">Complete challenge</span><span class="rules-pts">50 pts</span></div>
+        <div class="rules-divider"></div>
+        <div class="rules-row"><span class="rules-label">&#127941; 1st to submit</span><span class="rules-pts">+20 pts</span></div>
+        <div class="rules-row"><span class="rules-label">&#129352; 2nd to submit</span><span class="rules-pts">+15 pts</span></div>
+        <div class="rules-row"><span class="rules-label">&#129353; 3rd to submit</span><span class="rules-pts">+10 pts</span></div>
+        <div class="rules-row"><span class="rules-label">4th to submit</span><span class="rules-pts">+5 pts</span></div>
+      </div>
+      <div class="rules-section">
+        <div class="rules-section-title">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Daily challenge
+        </div>
+        <div class="rules-row"><span class="rules-label">Complete session</span><span class="rules-pts">10 pts</span></div>
+        <div class="rules-divider"></div>
+        <div class="rules-row"><span class="rules-label">&#128293; Every 5 days</span><span class="rules-pts">+10 pts</span></div>
+        <div class="rules-row" style="margin-top:6px"><span class="rules-label" style="font-size:11px;color:var(--muted);line-height:1.4">500 passes each foot against a wall. Film &amp; submit daily.</span></div>
+      </div>
+    </div>
+  </div>
   <div class="tab-content">
     <div class="view active" id="view-challenge"><div id="challenge-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
     <div class="view" id="view-daily"><div id="daily-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
