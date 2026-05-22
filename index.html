@@ -106,6 +106,21 @@ a.watch-yt:hover{text-decoration:underline;}
 .daily-banner{background:linear-gradient(135deg,rgba(90,140,232,0.15),rgba(90,140,232,0.05));border:1px solid rgba(90,140,232,0.3);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
 .daily-streak-num{font-family:var(--font-d);font-size:36px;color:#8ab4f8;line-height:1;flex-shrink:0;}
 .streak-toast{background:rgba(255,200,60,0.15);border:1px solid rgba(255,200,60,0.35);color:#ffd700;}
+.countdown-box{background:linear-gradient(135deg,rgba(30,33,87,0.9),rgba(37,42,110,0.9));border:1px solid var(--peach);border-radius:var(--radius);padding:16px 18px;margin-bottom:14px;text-align:center;}
+.countdown-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.countdown-timer{display:flex;justify-content:center;gap:12px;}
+.countdown-unit{display:flex;flex-direction:column;align-items:center;min-width:44px;}
+.countdown-num{font-family:var(--font-d);font-size:34px;color:var(--peach);line-height:1;}
+.countdown-lbl{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;}
+.countdown-sep{font-family:var(--font-d);font-size:30px;color:var(--peach);opacity:.4;align-self:flex-start;margin-top:2px;}
+.stats-back{background:none;border:none;color:var(--peach);font-size:13px;cursor:pointer;font-family:var(--font-b);display:flex;align-items:center;gap:5px;margin-bottom:14px;padding:0;}
+.stats-header{display:flex;align-items:center;gap:13px;padding:16px 18px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius);margin-bottom:14px;}
+.stats-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:16px;flex-shrink:0;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.stats-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:14px 12px;text-align:center;}
+.stats-num{font-family:var(--font-d);font-size:28px;color:var(--peach);line-height:1;}
+.stats-lbl{font-size:11px;color:var(--muted);margin-top:3px;}
+.history-row{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-sm);margin-bottom:6px;}
 </style>
 </head>
 <body>
@@ -155,6 +170,7 @@ a.watch-yt:hover{text-decoration:underline;}
     <div class="view" id="view-daily"><div id="daily-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
     <div class="view" id="view-leaderboard"><div id="lb-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
     <div class="view" id="view-coach"><div id="coach-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
+    <div class="view" id="view-stats"><div id="stats-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
   </div>
 </div>
 
@@ -211,6 +227,7 @@ function switchTab(name){
   if(name==='leaderboard') loadLeaderboard()
   if(name==='coach') loadCoachPanel()
   if(name==='daily') loadDaily()
+  if(name==='stats'){if(countdownInterval){clearInterval(countdownInterval);countdownInterval=null}}
   if(name==='challenge') {
     if(currentProfile?.is_viewer) loadViewerChallenge()
     else loadChallenge()
@@ -247,7 +264,8 @@ function renderChallenge(el,c,sub){
   +(c.day2_bonus>0?'<span class="pill green">+'+c.day2_bonus+' pts day 2</span>':'')
   +(c.day3_bonus>0?'<span class="pill green">+'+c.day3_bonus+' pts day 3</span>':'')
   +'</div><div id="submission-area">'+renderSubmissionArea(sub,c)+'</div></div>'
-  +'<p style="font-size:12px;color:var(--muted);text-align:center">Max possible this week: '+(c.flat_points+c.day1_bonus)+' pts</p>'
+  +'<div class="countdown-box" id="countdown-wrap"><div class="countdown-label">Next challenge drops in</div><div class="countdown-timer" id="countdown-timer"><div class="countdown-unit"><div class="countdown-num" id="cd-d">--</div><div class="countdown-lbl">Days</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-h">--</div><div class="countdown-lbl">Hours</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-m">--</div><div class="countdown-lbl">Mins</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-s">--</div><div class="countdown-lbl">Secs</div></div></div></div>'
+  startCountdown()
 }
 function renderSubmissionArea(sub,c){
   if(!sub) return '<div style="margin-bottom:4px;font-size:13px;font-weight:500">Submit your YouTube link</div><p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload your attempt to YouTube (can be unlisted), then paste the link below.</p><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="yt-link-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleYTInput(this.value)" /></div><div id="yt-feedback"></div><div id="yt-preview" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="yt-preview-frame" src="" allowfullscreen loading="lazy"></iframe></div></div><button class="btn-primary" id="submit-btn" onclick="submitYouTube()" disabled>Submit for Coach Review</button><div id="submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
@@ -361,7 +379,7 @@ async function loadLeaderboard(){
       const rc=i===0?'r1':i===1?'r2':i===2?'r3':'',col=p.avatar_color||COLORS[i%COLORS.length]
       const ini=p.display_name.split(' ').map(x=>x[0]).join('').toUpperCase()
       const streak=p.current_streak>0?'<div style="font-size:11px;color:var(--green)">&#128293; '+p.current_streak+' week streak</div>':''
-      return '<div class="lb-row'+(i<3?' gold':'')+'"><div class="lb-rank '+rc+'">'+(i+1)+'</div><div class="avatar" style="background:'+col+'33;color:'+col+';border:1px solid '+col+'55">'+ini+'</div><div class="flex-1"><div style="font-size:14px;font-weight:500">'+esc(p.display_name)+'</div>'+streak+'</div><div class="lb-pts">'+p.total_points+'</div></div>'
+      return '<div class="lb-row'+(i<3?' gold':'')+" onclick=\"showStats('"+p.id+"','"+p.display_name.replace(/'/g,"\\'")+"','"+col+"')\"" +' style="cursor:pointer"><div class="lb-rank '+rc+'">'+(i+1)+'</div><div class="avatar" style="background:'+col+'33;color:'+col+';border:1px solid '+col+'55">'+ini+'</div><div class="flex-1"><div style="font-size:14px;font-weight:500">'+esc(p.display_name)+'</div>'+streak+'</div><div style="display:flex;align-items:center;gap:8px"><div class="lb-pts">'+p.total_points+'</div><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(245,245,242,0.3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></div>'
     }).join('')
     el.innerHTML='<div class="lb-stats"><div class="stat-card"><div class="stat-num">'+total+'</div><div class="stat-lbl">Players</div></div><div class="stat-card"><div class="stat-num">'+onStreak+'</div><div class="stat-lbl">On a streak</div></div><div class="stat-card"><div class="stat-num">'+pct+'%</div><div class="stat-lbl">Participation</div></div></div>'+(rows||'<p class="text-muted" style="text-align:center;padding-top:20px">No players yet.</p>')
   }catch(e){el.innerHTML='<p class="text-muted">Could not load leaderboard.</p>';console.error(e)}
@@ -539,6 +557,67 @@ async function addPlayer(){
     document.getElementById('p-name').value='';document.getElementById('p-user').value='';document.getElementById('p-pin').value=''
     showToast('player-toast'); btn.disabled=false;btn.textContent='+ Add Player'
   }catch(e){errEl.style.display='block';errEl.textContent='Could not add player. Add them manually via Supabase dashboard.';btn.disabled=false;btn.textContent='+ Add Player';console.error(e)}
+}
+
+/* COUNTDOWN */
+let countdownInterval=null
+function startCountdown(){
+  if(countdownInterval) clearInterval(countdownInterval)
+  function tick(){
+    const wrap=document.getElementById('countdown-wrap')
+    if(!wrap){clearInterval(countdownInterval);return}
+    const now=new Date()
+    const day=now.getDay(),hour=now.getHours()
+    // Next Monday 9am EST (14:00 UTC)
+    const target=new Date(now)
+    const daysUntil=day===1&&hour<14?0:day===1?7:(8-day)%7||7
+    target.setDate(now.getDate()+daysUntil)
+    target.setHours(14,0,0,0)
+    const diff=target-now
+    if(diff<=0){document.getElementById('cd-d').textContent='0';document.getElementById('cd-h').textContent='00';document.getElementById('cd-m').textContent='00';document.getElementById('cd-s').textContent='00';return}
+    const d=Math.floor(diff/86400000)
+    const h=Math.floor((diff%86400000)/3600000)
+    const m=Math.floor((diff%3600000)/60000)
+    const s=Math.floor((diff%60000)/1000)
+    const pad=n=>String(n).padStart(2,'0')
+    document.getElementById('cd-d').textContent=d
+    document.getElementById('cd-h').textContent=pad(h)
+    document.getElementById('cd-m').textContent=pad(m)
+    document.getElementById('cd-s').textContent=pad(s)
+  }
+  tick()
+  countdownInterval=setInterval(tick,1000)
+}
+
+/* PLAYER STATS */
+async function showStats(playerId,displayName,avatarColor){
+  switchTab('stats')
+  const el=document.getElementById('stats-content')
+  el.innerHTML='<div class="loading-center"><div class="spinner"></div></div>'
+  try{
+    const COLORS=['#3a5bbf','#bf5a3a','#3abf7a','#bf3a7a','#7a3abf','#3a9bbf','#bfaa3a','#bf3a3a','#3abfbf','#7abf3a','#bf7a3a','#3a3abf']
+    const col=avatarColor||COLORS[0]
+    const ini=displayName.split(' ').map(x=>x[0]).join('').toUpperCase()
+    const[{data:profile},{data:weekSubs},{data:dailySubs}]=await Promise.all([
+      sb.from('profiles').select('total_points,current_streak').eq('id',playerId).single(),
+      sb.from('submissions').select('status,points_awarded,submitted_at,challenges(title)').eq('player_id',playerId).order('submitted_at',{ascending:false}).limit(10),
+      sb.from('daily_submissions').select('status,submitted_date,points_awarded').eq('player_id',playerId).order('submitted_date',{ascending:false}).limit(14)
+    ])
+    const weekDone=(weekSubs||[]).filter(s=>s.status==='approved').length
+    const dailyDone=(dailySubs||[]).filter(s=>s.status==='approved').length
+    const totalPts=profile?.total_points||0
+    const streak=profile?.current_streak||0
+
+    const weekRows=(weekSubs||[]).map(s=>'<div class="history-row"><div style="font-size:13px">'+esc(s.challenges?.title||'Challenge')+'</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--muted)">'+new Date(s.submitted_at).toLocaleDateString('en-GB',{month:'short',day:'numeric'})+'</span>'+(s.status==='approved'?'<span style="font-size:12px;color:var(--green)">+'+s.points_awarded+'</span>':s.status==='pending'?'<span style="font-size:11px;color:var(--peach)">pending</span>':'<span style="font-size:11px;color:var(--danger)">rejected</span>')+'</div></div>').join('')
+
+    const dailyRows=(dailySubs||[]).map(s=>'<div class="history-row"><div style="font-size:13px">Wall Pass 1000</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--muted)">'+s.submitted_date+'</span>'+(s.status==='approved'?'<span style="font-size:12px;color:var(--green)">+'+s.points_awarded+'</span>':s.status==='pending'?'<span style="font-size:11px;color:var(--peach)">pending</span>':'<span style="font-size:11px;color:var(--danger)">rejected</span>')+'</div></div>').join('')
+
+    el.innerHTML='<button class="stats-back" onclick="switchTab('leaderboard')">&#8592; Back to leaderboard</button>'
+    +'<div class="stats-header"><div class="stats-avatar" style="background:'+col+'33;color:'+col+';border:2px solid '+col+'55">'+ini+'</div><div><div style="font-size:18px;font-weight:500">'+esc(displayName)+'</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Player stats</div></div></div>'
+    +'<div class="stats-grid"><div class="stats-card"><div class="stats-num">'+totalPts+'</div><div class="stats-lbl">Total points</div></div><div class="stats-card"><div class="stats-num">'+streak+'</div><div class="stats-lbl">Week streak</div></div><div class="stats-card"><div class="stats-num">'+weekDone+'</div><div class="stats-lbl">Weekly completed</div></div><div class="stats-card"><div class="stats-num">'+dailyDone+'</div><div class="stats-lbl">Daily sessions</div></div></div>'
+    +(weekRows?'<div class="admin-label" style="margin-bottom:8px">Recent weekly challenges</div>'+weekRows:'')
+    +(dailyRows?'<div class="admin-label" style="margin-top:14px;margin-bottom:8px">Recent daily sessions</div>'+dailyRows:'')
+  }catch(e){el.innerHTML='<p class="text-muted">Could not load stats.</p>';console.error(e)}
 }
 
 /* HELPERS */
