@@ -1,1393 +1,3 @@
-
-Challenge Website
-/
-Claude finished the response
-Are you able to build websites? I'm a coach of a soccer team and I'm planning on releasing challenges every Monday morning. Each member of the team will need to upload a video to the website. Depending on when they upload their video and I'm able to confirm they completed the challenge, they will be awarded points. I need the points to go toward a leaderboard which is visible on the website.
-
-May 18
-
-Reading frontend design skill
-Reading frontend design skill
-Yes, absolutely! This is a great idea and very buildable. Before I dive in, let me ask a few quick questions so I can tailor it to your team.
-
-Q: How many players are on your team (roughly)?
-A: 10–15
-
-Q: What should the point system look like?
-A: Both — flat points + early bonus
-
-Q: What vibe should the site have?
-A: Bold & energetic (soccer-themed)
-
-May 18
-
-
-Here's a working prototype of your platform! It has three sections:
-
-This Week — shows the active challenge, the point breakdown (flat + early-bird tiers), and a video upload area. Players see exactly how many bonus points they can earn by uploading early.
-
-Leaderboard — ranks all players by season total with their weekly streak, completion badge, and color-coded avatars. Updates as the coach approves submissions.
-
-Coach panel — lets you review pending video submissions and approve or reject them, adjust the point values for any tier, and draft the next week's challenge ready to post Monday morning.
-
-To turn this into a real, deployable website I'd need to add a proper backend (for storing video uploads, user accounts, and points), which goes beyond what can run in a single file. Here's what that would look like in practice:
-
-Video storage — a service like Cloudflare R2, AWS S3, or Supabase Storage
-Database — player accounts, submissions, point history (Supabase or Firebase work great for this scale)
-Authentication — so each player logs in and can only submit for themselves
-Hosting — something like Vercel or Netlify for the frontend
-Would you like me to build this out as a full React app you could deploy, or does the prototype give you enough to share with a developer? I can also adjust the point amounts, the design, or anything else about how it works.
-
-I'm not sure how the points system should work right now but I like the design so far. I also want to be able to put our clubs crest as well as the clubs colors instead of the green and yellow. I'm okay with using Supabase
-
-May 18
-That all makes total sense — we can lock in the design direction and sort the points system later. A few quick questions before I build the full version:
-
-Q: What are your club's main colors?
-A: Am I able to upload our crest which you can use on the website and get the colors from that?
-
-Q: How should players log in?
-A: Just a username & PIN
-
-Q: Who can access the Coach panel?
-A: One coach account (you)
-
-May 18
-Yes, absolutely! Upload your club crest here and I'll pull the colors from it and use it on the site.
-
-1779141684444_image.png
-May 18
-Love it! I can see the crest clearly — Land United FC with a deep navy blue and a warm peach/gold accent. Let me rebuild the platform with those exact colors and the crest.
-
-
-
-The site is now fully branded as Land United FC — deep navy and peach pulled straight from the crest, with the badge showing in the header and login screen.
-
-You can try it out right now — sign in with:
-
-Coach login: username coach · PIN 0000
-Player login: username marcus_r · PIN 1234
-The coach account gets the extra Coach tab. Players only see their challenge and the leaderboard.
-
-When you're ready to make this a real deployable site, the next steps would be:
-
-Set up Supabase — a players table, a challenges table, a submissions table, and a points table
-Build it as a React app — I can generate the full codebase ready to deploy to Vercel
-Add real video uploads — submissions go to Supabase Storage, coach gets notified and approves from the dashboard
-Want me to go ahead and generate the full React + Supabase codebase, or would you like to tweak anything about the design first?
-
-Yes let's generate. How easy is it to make updates through this app as I think of neat ideas to add? I imagine I will have creative ideas to make the product even better. Also, when I release the weekly challenges, I will be uploading a video of myself doing the challenge which needs to be visible to the players so they can see it being done the correct way.
-
-May 18
-Great questions! Here's what to expect:
-
-Making updates — very easy. Whenever you have a new idea, just come back here and describe it. Since I'm generating the full codebase, I can open any file and make targeted changes without rebuilding everything. Things like new features, layout tweaks, or rule changes are usually a quick back-and-forth.
-
-Coach demo video — perfect idea. I'll add a video player to the challenge card so when you post a challenge, you upload your own clip alongside it. Players see it front and center before they attempt the challenge.
-
-Let me build the full thing now.
-
-
-Created 13 files, ran 5 commands, viewed a file
-Created 13 files, ran 5 commands, viewed a file
-Here's the full codebase. Everything is inside the zip — your crest is already bundled in.
-
-What's included:
-
-src/pages/ChallengePage.jsx — players see your demo video front and centre, then upload their attempt
-src/pages/CoachPage.jsx — you post challenges (with demo video upload), review submissions, and add players
-src/pages/LeaderboardPage.jsx — live rankings pulled from Supabase
-src/lib/supabase.js — all database calls in one place
-supabase-schema.sql — paste this into Supabase once to set everything up
-README.md — step-by-step setup guide, start to finish
-To get it live, the steps are:
-
-Create a free Supabase project → run the SQL schema → create your coach account
-Create a free Vercel account → connect your GitHub → paste two environment variables → deploy
-The README walks through every step in detail. It should take about 30 minutes to go from zero to live link you can share with the squad.
-
-On making updates — extremely easy. Each feature lives in its own file (ChallengePage.jsx, CoachPage.jsx, etc.), so when you have a new idea just tell me what you want. I'll open the relevant file, make the change, and hand you an updated zip. No need to rebuild from scratch.
-
-
-Land united fc
-ZIP 
-can you build this without using a vercel account and only using supabase?
-
-May 18
-Yes — Supabase has built-in hosting for static sites, but the cleanest way to go fully Supabase-only is to build the app as a single HTML file that talks directly to Supabase via their JavaScript CDN. No build step, no Vercel, no Node.js — you just upload one file to Supabase Storage and it's live.
-
-Let me rebuild the whole thing as a single self-contained HTML file.
-
-
-Created 2 files, ran 2 commands, viewed a file
-Created 2 files, ran 2 commands, viewed a file
-Inside the zip you'll find just three files — that's the whole thing:
-
-index.html — the entire app (open it in a text editor to paste your 2 Supabase credentials at the top)
-supabase-schema.sql — paste this once into Supabase to set up your database
-README.md — step-by-step setup guide
-The short version to go live:
-
-Create a free Supabase project → run the SQL schema
-Create 3 storage buckets (videos, assets, site) — all public
-Upload your crest to assets, copy its URL into index.html
-Paste your Supabase URL + anon key into index.html (two lines at the top)
-Upload index.html to the site bucket → copy its public URL → done
-That URL is your live website. When you want an update, I edit index.html and you just re-upload it to the site bucket — it's live in seconds.
-
-
-Land united fc supabase
-ZIP 
-when I copied the index.html file to the site bucket and got the URL, the URL doesn't send me to something that looks like a website. it looks like code
-
-May 18
-That's a common Supabase gotcha — when you open a file directly from Storage, it serves it as a download rather than rendering it as a webpage.
-
-The fix is to use Supabase's static site hosting instead. Here's what to do:
-
-Option 1 — Use the correct storage URL format
-
-When you click the file in Storage and copy the URL, it looks like this:
-
-https://xxx.supabase.co/storage/v1/object/public/site/index.html
-Make sure you're opening that full URL in your browser — it should render as HTML. If it's showing code, your browser may be treating it as plain text. Try:
-
-Right-click the file in Supabase Storage
-Click Copy URL (not download)
-Paste it in a new browser tab
-If that still shows code, the bucket's content-type isn't being set correctly, which leads to Option 2.
-
-Option 2 — Fix the content-type when uploading (recommended)
-
-Supabase Storage needs to know the file is HTML. Instead of dragging and dropping, upload via their dashboard like this:
-
-Go to Storage → site bucket
-Delete the existing index.html
-Click Upload file
-Select index.html
-Before confirming, look for a MIME type / Content-Type field and set it to text/html
-Upload → get the URL again
-Option 3 — Use a free alternative that's just as simple
-
-If the Storage approach keeps being fussy, Cloudflare Pages or GitHub Pages are both completely free, take about 2 minutes to set up, and just need you to drop the index.html file in. No account linking to anything else required. Would you like instructions for either of those?
-
-Which option would you like to try?
-
-it's not giving me that URL. This is the URL it's giving me: https://vajcbpsohffoyitifcvh.supabase.co/storage/v1/object/sign/site/index.html?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jNmViNjFmMC0wNWM4LTQ3MWMtODU1Zi03ZGE0ZjMzNTQ3ZjAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzaXRlL2luZGV4Lmh0bWwiLCJpYXQiOjE3NzkxNDcyNTQsImV4cCI6MTgxMDY4MzI1NH0.Zj4utSTjR5BMEVXHAjRUtl6wgWa-CaHEWmVOWas1Bys
-
-May 18
-That URL is a signed URL which means your bucket is set to private, not public. That's why it's generating a token instead of a clean public link.
-
-Here's the fix — it takes about 30 seconds:
-
-Go to Storage in your Supabase dashboard
-Click the site bucket
-Click the three dots (⋯) next to the bucket name → Edit bucket
-Toggle Public bucket to ON
-Click Save
-Then: 6. Click on index.html in the bucket 7. Click Get URL — this time it should give you a clean URL like:
-
-   https://vajcbpsohffoyitifcvh.supabase.co/storage/v1/object/public/site/index.html
-Open that URL in your browser — it should load the login screen
-Do the same check for your videos and assets buckets too — they also need to be public for the crest image and player videos to load correctly.
-
-I got the things changed to public and got a better looking URL but still giving me the same output of code. Used Edge and Chrome https://vajcbpsohffoyitifcvh.supabase.co/storage/v1/object/public/site/index.html
-
-May 18
-The issue is Supabase Storage is serving the file with the wrong content-type — it's sending it as text/plain instead of text/html, so browsers display the code rather than rendering it.
-
-The easiest fix at this point is GitHub Pages — it's completely free, takes about 5 minutes, and you never need to touch it again. Updating the site is still just replacing one file.
-
-Here's how:
-
-Go to github.com and create a free account if you don't have one
-Click New repository (the green button)
-Name it land-united-fc, set it to Public, click Create repository
-On the next screen click uploading an existing file
-Drag your index.html in → click Commit changes
-Go to Settings (top of the repo) → Pages (left sidebar)
-Under Branch, select main → click Save
-Wait about 60 seconds → your site will be live at:
-   https://YOUR-USERNAME.github.io/land-united-fc
-That's your permanent URL to share with the squad. When you want an update, you just go back to the repo, click index.html, click the pencil icon (or upload a new version), and it's live within a minute.
-
-No terminal, no code, no other tools — just the GitHub website. Want me to walk through any of those steps in more detail?
-
-the github thing worked. is it reading from the updates made on supabase?
-
-May 18
-Yes! The way it's wired up, GitHub just hosts the index.html file — it's purely the "shell" of the app. All the actual data lives in Supabase:
-
-Player logins → Supabase Auth
-Challenges → Supabase database
-Video uploads → Supabase Storage
-Points & leaderboard → Supabase database
-So when a player logs in, submits a video, or you approve something as coach — all of that is reading from and writing to your Supabase project in real time. GitHub never touches any of it.
-
-The only time you'd need to update the GitHub file is when you want to change how the app itself looks or works — like adding a new feature or tweaking the design. For that you'd just re-upload the index.html to GitHub and it's live within a minute.
-
-Your next steps to actually test it end-to-end:
-
-Go to your Supabase dashboard → SQL Editor → run the supabase-schema.sql file if you haven't already
-Go to Authentication → Users → Add user and create your coach account (coach@landunited.internal + your PIN)
-Go to Table Editor → profiles → find that row → set is_coach = true
-Open your GitHub Pages URL and try logging in
-Have you run the SQL schema yet?
-
-I have run the SQL schema, yes. I added the user coach and set it to true but I'm not able to login
-
-May 18
-The issue is likely that Supabase didn't automatically create a row in the profiles table when you created the coach user through the Auth dashboard. You need to add that row manually.
-
-Here's how to fix it:
-
-Step 1 — Get your coach's user ID
-
-Go to Authentication → Users in Supabase
-Find your coach user and copy the UUID (the long string like abc123-...)
-Step 2 — Add the profile row manually
-
-Go to SQL Editor
-Run this query (paste your UUID in):
-sql
-INSERT INTO public.profiles (id, username, display_name, is_coach, total_points, current_streak)
-VALUES (
-  'PASTE-YOUR-UUID-HERE',
-  'coach',
-  'Coach',
-  true,
-  0,
-  0
-);
-Step 3 — Try logging in again
-
-On the login screen use:
-
-Username: coach
-PIN: whatever password you set when creating the user in Auth
-That should get you in. Let me know what happens!
-
-I've actually decided that I'm worried about the privacy of my players. I plan on them uploading their videos to youtube. I need this website to allow players to provide the link to their videos
-
-May 19
-Good thinking. That actually simplifies things too — no video storage needed in Supabase, and no file size limits to worry about.
-
-Here's what I'll change:
-
-Replace the video upload zone with a YouTube link input field
-Show an embedded YouTube player so you can watch it directly in the coach panel without leaving the site
-Players can also see each other's approved videos on the leaderboard if you ever want that
-Let me update the file now.
-
-
-Read current index.html to update it
-Read current index.html to update it
-Good, I have the full file. Now I'll also need to update the Supabase schema to store a YouTube URL instead of a video file path. Let me rebuild both files.
-
-
-Ran 2 commands, read a file
-Ran 2 commands, read a file
-Here's the updated file. Here's what changed:
-
-For players — instead of a file upload button, they now see a YouTube link field. They paste their link (any format works — youtube.com/watch?v=, youtu.be/, or YouTube Shorts), the app validates it instantly and shows a preview of the video right there before they submit. This way their video stays on YouTube and never passes through your site.
-
-For you as coach — pending submissions show an embedded YouTube player directly in the coach panel so you can watch the video without leaving the app, plus an "Open in YouTube" link if you want fullscreen.
-
-For your demo video — same thing. When posting a challenge you paste your YouTube link and it embeds for all players to watch before attempting.
-
-To update GitHub Pages:
-
-Go to your GitHub repo
-Click on index.html → click the pencil icon (Edit)
-Select all the old code and delete it
-Paste in the contents of the new index.html
-Click Commit changes — live in about 60 seconds
-
-Land united fc youtube
-ZIP 
-Can we use DuckDB instead?
-
-May 19
-DuckDB isn't a good fit for this — it's an analytics database designed to run queries on local files (like CSVs and Parquets) on your own machine. It has no server, no auth system, no user accounts, and no way for multiple people to connect to it over the internet. It's brilliant for data analysis but not for running a live multi-user web app.
-
-For what you've built — player logins, video submissions, a live leaderboard — you need a database that:
-
-Runs on a server 24/7
-Handles multiple users connecting at once
-Has built-in authentication
-Supabase does all of that, and you've already got it set up and working. Switching would mean starting over with something that isn't designed for this use case.
-
-Is there something specific that's frustrating you about Supabase? If something isn't working the way you'd like, it's likely quicker to fix that than to swap the whole backend.
-
-I need to start from complete scratch as I was getting errors and instead of figuring out the error it's easier to start from the beginning
-
-May 19
-Totally fair — a clean start is sometimes the quickest path. Let's do it properly this time and make sure everything works before you touch any code.
-
-Let me ask a couple of quick things first so I can give you exact steps:
-
-Q: Have you deleted the old Supabase project, or are you starting fresh with a brand new account?
-A: Deleted the old project, same account
-
-Q: Did the GitHub Pages site itself load correctly (showing the login screen), or was the error happening inside the app?
-A: GitHub loaded fine — errors were inside the app
-
-May 19
-Good — that tells me the HTML file and GitHub are working perfectly. The errors were purely on the Supabase side, which means this fresh start will be straightforward.
-
-Here's the complete setup, step by step. Follow these in order and don't skip anything.
-
-Step 1 — Create a new Supabase project
-Go to supabase.com and sign in
-Click New project
-Name it land-united-fc
-Set a database password (save it somewhere, you won't need it often)
-Choose the region closest to you
-Click Create new project and wait about 2 minutes for it to spin up
-Step 2 — Run the database schema
-In your new project, click SQL Editor in the left sidebar
-Click New query
-Copy and paste everything below and click Run
-sql
--- PROFILES TABLE
-create table public.profiles (
-  id             uuid primary key references auth.users(id) on delete cascade,
-  username       text unique not null,
-  display_name   text not null,
-  is_coach       boolean default false,
-  total_points   integer default 0,
-  current_streak integer default 0,
-  avatar_color   text default '#3a5bbf',
-  created_at     timestamptz default now()
-);
-alter table public.profiles enable row level security;
-create policy "profiles_read_all"   on public.profiles for select using (true);
-create policy "profiles_update_own" on public.profiles for update using (auth.uid() = id);
-
--- CHALLENGES TABLE
-create table public.challenges (
-  id            uuid primary key default gen_random_uuid(),
-  title         text not null,
-  description   text not null,
-  demo_video_url text,
-  flat_points   integer default 50,
-  day1_bonus    integer default 20,
-  day2_bonus    integer default 10,
-  day3_bonus    integer default 5,
-  is_active     boolean default false,
-  created_at    timestamptz default now()
-);
-alter table public.challenges enable row level security;
-create policy "challenges_read_all"   on public.challenges for select using (true);
-create policy "challenges_write_coach" on public.challenges for all using (
-  exists (select 1 from public.profiles where id = auth.uid() and is_coach = true)
-);
-
--- SUBMISSIONS TABLE
-create table public.submissions (
-  id               uuid primary key default gen_random_uuid(),
-  challenge_id     uuid references public.challenges(id) on delete cascade,
-  player_id        uuid references public.profiles(id) on delete cascade,
-  video_url        text not null,
-  status           text default 'pending' check (status in ('pending','approved','rejected')),
-  points_awarded   integer,
-  rejection_reason text,
-  submitted_at     timestamptz default now(),
-  reviewed_at      timestamptz,
-  unique(challenge_id, player_id)
-);
-alter table public.submissions enable row level security;
-create policy "submissions_read" on public.submissions for select using (
-  auth.uid() = player_id or
-  exists (select 1 from public.profiles where id = auth.uid() and is_coach = true)
-);
-create policy "submissions_insert_own" on public.submissions for insert with check (auth.uid() = player_id);
-create policy "submissions_update_coach" on public.submissions for update using (
-  exists (select 1 from public.profiles where id = auth.uid() and is_coach = true)
-);
-
--- ADD POINTS FUNCTION
-create or replace function add_points(player_id uuid, amount integer)
-returns void language plpgsql security definer as $$
-begin
-  update public.profiles set total_points = total_points + amount where id = player_id;
-end;
-$$;
-You should see Success. No rows returned — that means it worked.
-
-Step 3 — Create your coach account
-In the left sidebar click Authentication → Users
-Click Add user → Create new user
-Set email to: coach@landunited.internal
-Set password to your chosen 4-digit PIN (e.g. 1234)
-Click Create user
-Copy the UUID shown next to the user you just created (looks like abc12345-...)
-Now go to SQL Editor → New query and run this, replacing the UUID and choosing a username:
-
-sql
-insert into public.profiles (id, username, display_name, is_coach)
-values (
-  'PASTE-YOUR-UUID-HERE',
-  'coach',
-  'Coach',
-  true
-);
-Step 4 — Get your Supabase credentials
-Click Settings (gear icon at the bottom of the left sidebar)
-Click API
-Copy the Project URL — looks like https://abcdef.supabase.co
-Copy the anon public key — the long string under "Project API keys"
-Keep these two values handy for the next step.
-
-Step 5 — Update and upload the HTML file
-Open the index.html from the zip I gave you earlier in any text editor (Notepad on Windows, TextEdit on Mac). Find these three lines near the very top:
-
-javascript
-const SUPABASE_URL  = 'https://YOUR_PROJECT_ID.supabase.co'
-const SUPABASE_ANON = 'YOUR_ANON_KEY_HERE'
-const CREST_URL = 'https://YOUR_PROJECT_ID.supabase.co/...'
-Replace SUPABASE_URL with your Project URL
-Replace SUPABASE_ANON with your anon key
-For CREST_URL — if you want the crest for now, paste your Project URL and change it to: https://YOUR-PROJECT-URL.supabase.co/storage/v1/object/public/assets/crest.png (we'll upload the crest in a moment)
-Save the file.
-
-Step 6 — Upload crest to Supabase Storage
-Click Storage in the left sidebar
-Click New bucket → name it assets → toggle Public ON → Create
-Open the assets bucket → Upload file → choose your crest image → upload
-Click the uploaded file → Get URL → copy it
-Go back to your index.html and replace the CREST_URL value with this URL, then save
-Step 7 — Push to GitHub
-Go to your GitHub repo
-Click index.html → click the pencil icon (Edit file)
-Select all (Ctrl+A / Cmd+A) and delete everything
-Open your updated local index.html, select all, copy, and paste it in
-Click Commit changes
-Wait 60 seconds then open your GitHub Pages URL — you should see the login screen with the crest.
-
-Step 8 — Test the login
-Username: coach
-PIN: whatever you set in Step 3
-Once that works, tell me and we'll add your first player. What errors were you seeing before so I can make sure we avoid them this time?
-
-login isn't working
-
-May 19
-Let's figure this out. Open your browser's developer tools so we can see the exact error:
-
-Go to your GitHub Pages site
-Press F12 (or right-click anywhere → Inspect)
-Click the Console tab
-Try to log in
-Look for any red error messages that appear
-Copy and paste what you see in the console here and I'll tell you exactly what's wrong.
-
-Failed to load resource: the server responded with a status of 404 ()
-
-May 19
-That 404 means the app is connecting to Supabase fine but can't find something — almost certainly the profiles table lookup is failing because the profile row for your coach account wasn't created properly.
-
-Let's verify and fix it directly.
-
-Step 1 — Check if the profile row exists
-
-Go to Supabase → Table Editor → profiles table. Is there any row in there at all?
-
-If it's empty — the insert didn't work. Go to SQL Editor and run this (replace the UUID with your coach's UUID from Authentication → Users):
-sql
-insert into public.profiles (id, username, display_name, is_coach)
-values (
-  'PASTE-YOUR-UUID-HERE',
-  'coach',
-  'Coach',
-  true
-);
-If there is a row — copy exactly what's in the username column and make sure you're typing it exactly that way on the login screen (no capital letters, no spaces)
-Step 2 — Double check the password
-
-Go to Authentication → Users → find your coach user. The email must be exactly coach@landunited.internal and the password must be exactly your 4-digit PIN with nothing else.
-
-If you're unsure, click the three dots next to the user → Send password reset won't work here, so instead click Delete and recreate the user from scratch, then re-run the profile insert.
-
-What does the profiles table show — is it empty or is there a row?
-
-there is a row
-
-May 19
-Good. So the profile exists. The 404 is likely coming from the Supabase URL or anon key being slightly off in the HTML file.
-
-Let's check both:
-
-Step 1 — Verify your credentials in the HTML
-
-Open your index.html and check these three things very carefully:
-
-SUPABASE_URL — should look exactly like https://abcdefghij.supabase.co with no trailing slash at the end
-SUPABASE_ANON — should be the long eyJ... string from Settings → API → anon public key
-Make sure there are no extra spaces or missing quote marks around either value
-Step 2 — Verify in Supabase
-
-Go to Settings → API in Supabase and compare the Project URL there against what's in your HTML. They need to match character for character.
-
-Step 3 — Quick test
-
-In your browser console (F12 → Console), paste this and hit Enter — replacing the values with yours:
-
-javascript
-const { createClient } = supabase
-const sb = createClient('YOUR_SUPABASE_URL', 'YOUR_ANON_KEY')
-sb.from('profiles').select('*').then(r => console.log(r))
-If it returns data, the credentials are correct and we look elsewhere. If it returns a 404 or error, the URL or key is wrong.
-
-What does that test return?
-
-my supabase_url has /rest/v1/ at the end. should I leave that off?
-
-May 19
-Yes — remove it. It should just be the base URL with nothing after the .co:
-
-javascript
-const SUPABASE_URL = 'https://abcdefghij.supabase.co'
-The Supabase client library adds /rest/v1/ automatically — if you include it yourself it doubles up and breaks everything, which is exactly what causes that 404.
-
-Fix that in your index.html, save it, paste it into GitHub, wait 60 seconds, and try logging in again.
-
-Still doesn't work
-
-May 19
-Let's try the console test to pinpoint exactly where it's breaking.
-
-Go to your GitHub Pages site, press F12 → Console tab, then paste this in and hit Enter (with your actual values):
-
-javascript
-sb.auth.signInWithPassword({
-  email: 'coach@landunited.internal',
-  password: 'YOUR-PIN-HERE'
-}).then(r => console.log(r))
-Copy everything that gets printed back here — both the result and any red errors. That will tell us exactly whether it's a credentials issue, an auth issue, or something else.
-
-Uncaught ReferenceError: sb is not defined
-    at <anonymous>:1:1
-
-May 19
-That means the Supabase client isn't initialising at all — which points to the credentials block at the top of the HTML not being set up correctly.
-
-Can you open your index.html in a text editor and copy the first 10 lines of the <script> block here? It should look like this:
-
-javascript
-const SUPABASE_URL  = 'https://abcdefghij.supabase.co'
-const SUPABASE_ANON = 'eyJhbGc...'
-const CREST_URL = 'https://...'
-Paste what you actually have and I'll spot the issue immediately.
-
-<script>
-  const SUPABASE_URL  = 'https://okqehbtiyipbymbggpri.supabase.co'
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rcWVoYnRpeWlwYnltYmdncHJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMjM0ODMsImV4cCI6MjA5NDc5OTQ4M30.rOqD4NgCo1SMRa-yopsNLw7fl56pKepDEoHn6m44mkI'
-  // Crest image URL — after uploading crest to Supabase Storage,
-  // paste the public URL here:
-  const CREST_URL = 'https://okqehbtiyipbymbggpri.supabase.co/storage/v1/object/public/assets/land-united-crest.webp'
-</script>
-
-May 19
-Those credentials look perfectly fine. The problem is that this <script> block is separated from the main script block where sb is created, so by the time the page loads the Supabase client isn't being initialised.
-
-Can you scroll down in your index.html and find the second <script> block — it should start with:
-
-javascript
-const { createClient } = supabase
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON)
-Is that section still there, or did it accidentally get deleted when you copied and pasted into GitHub?
-
-yes it's still there
-
-<script>
-/* ═══════════════════════════════════════════════════════
-   SUPABASE CLIENT
-═══════════════════════════════════════════════════════ */
-const { createClient } = supabase
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON)
-/* ═══════════════════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════════════════ */
-let currentSession = null
-let currentProfile = null
-let activeChallenge = null
-let mySubmission = null
-let selectedVideoFile = null
-
-Show more
-May 19
-The code looks correct. The issue is likely that the Supabase CDN script isn't loading before your code runs. Check the console — do you see any red errors before the sb is not defined one, something mentioning supabase or cdn.jsdelivr.net?
-
-Also check the very top of your HTML file — there should be this line in the <head>:
-
-html
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-Is that line still there? When pasting into GitHub's editor it's easy to accidentally delete the top few lines.
-
-i dont see any red errors before the sb is not defined, nothing about supabase, and that line is still there in my index.html file
-
-May 19
-The CDN line is there in your local file, but let's confirm GitHub actually has the latest version. Sometimes the GitHub editor doesn't save the full file correctly.
-
-Check what GitHub actually has:
-
-Go to your GitHub repo
-Click on index.html
-Press Ctrl+F and search for jsdelivr
-Does that line appear in what GitHub is showing you?
-
-yes
-
-May 19
-Okay let's try forcing it to load in the right order. In your index.html, find this line in the <head>:
-
-html
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-Change it to add defer removed and add it as a blocking script by making sure it has no defer or async attribute — but more importantly, move your credentials script after it. Your <head> should look like this exact order:
-
-html
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
-  const SUPABASE_URL  = 'https://okqehbtiyipbymbggpri.supabase.co'
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-  const CREST_URL = 'https://okqehbtiyipbymbggpri.supabase.co/storage/v1/object/public/assets/land-united-crest.webp'
-</script>
-Right now your credentials script is likely sitting before the CDN script loads, so supabase doesn't exist yet when the main script tries to use it.
-
-Can you check the order in your file — does the CDN <script src=...> line come before or after your credentials <script> block?
-
-Do i remove the SUPABASE_URL, etc. below?
-
-May 19
-No, keep them exactly where they are below. Just make sure the order in your <head> is:
-
-CDN script tag
-Your credentials script block
-So it should look like this:
-
-html
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Land United FC — Challenges</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
-<script>
-  const SUPABASE_URL  = 'https://okqehbtiyipbymbggpri.supabase.co'
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-  const CREST_URL = 'https://okqehbtiyipbymbggpri.supabase.co/storage/v1/object/public/assets/land-united-crest.webp'
-</script>
-
-<style>
-...
-The credentials block needs to come after the CDN line but before the <style> block. Everything else in the file stays exactly as it is — just move those two things into the right order.
-
-okay so the credentials block will be in two separate locations in the index.html file
-
-May 19
-No — you'll only have it in one place. Here's what to do:
-
-Find the credentials <script> block that's currently sitting below the <style> block (the one starting with <!-- PASTE YOUR SUPABASE CREDENTIALS HERE --> or similar)
-Cut it (delete it from where it is)
-Paste it into the <head>, right after the CDN <script src=...> line
-So it moves from where it currently is to the <head>. Only one copy, just in a different location.
-
-okay ive done this now let me upload to github
-
-May 19
-Go ahead — once it's uploaded and GitHub Pages has updated (usually 30-60 seconds), try logging in and let me know what happens!
-
-that worked
-
-May 19
-Let's get your first player added then. Go to your Supabase dashboard → Authentication → Users → Add user → Create new user and set:
-
-Email: playerusername@landunited.internal (e.g. marcus_r@landunited.internal)
-Password: their 4-digit PIN
-Then go to SQL Editor and run this to create their profile:
-
-sql
-insert into public.profiles (id, username, display_name, is_coach)
-values (
-  'PASTE-THEIR-UUID-HERE',
-  'marcus_r',
-  'Marcus R.',
-  false
-);
-Repeat that for each player — one Auth user + one SQL insert per person.
-
-Once you've added a player, test their login on the site and let me know if it works. After that we can post your first challenge and you'll be fully up and running!
-
-I will have to do tomorrow. I'm tired
-
-May 19
-No problem at all — you've made great progress today! The hard part is done. When you're back tomorrow, the next steps are simply:
-
-Add your players (Auth user + SQL insert per player)
-Post your first challenge from the Coach tab
-Share the GitHub Pages URL with your squad
-Come back whenever you're ready and I'll be here to help. Get some rest! 🙌
-
-FYI - When I go to the coaches tab, it's asking me for a video upload, not a youtube link like you mentioned
-
-May 19
-Good catch! That's because the version you have on GitHub is the older one with file upload — the YouTube link version was generated after but you may have uploaded the wrong zip to GitHub.
-
-Grab the file from the land-united-fc-youtube zip I sent earlier, open that index.html, add your credentials block into the <head> the same way you just did, then upload it to GitHub.
-
-That version has the YouTube link input for both players and your coach demo video. Get some rest and tackle it tomorrow!
-
-good catch. will do that tomorrow also.
-
-May 19
-Sleep well! When you're back tomorrow you've got a clear list:
-
-Swap in the YouTube version of index.html (with credentials in the <head>)
-Add your players
-Post your first challenge
-Share the link with the squad
-See you tomorrow! 👋
-
-okay I'm back
-
-3:50 PM
-Welcome back! Let's pick up where you left off. Quick reminder of the plan for today:
-
-Swap in the YouTube version of index.html
-Add your players
-Post your first challenge
-Share the link with the squad
-Have you got the land-united-fc-youtube zip open and ready to edit?
-
-can you give me the correct index.html to swap please
-
-3:51 PM
-Sure! Let me generate you a clean, ready-to-go version with everything in the right order.
-
-
-Read the YouTube version of index.html
-Read the YouTube version of index.html
-I'll generate a clean copy with your credentials already in the right place so you just upload it directly — no editing needed.
-
-
-Ran a command, read a file
-Ran a command, read a file
-Your credentials are already baked in — no editing needed. Just:
-
-Download that file
-Go to your GitHub repo → click index.html → pencil icon
-Select all → delete → paste the contents of this new file
-Commit changes
-That's it. Login should work exactly as before, and you'll now have the YouTube link input instead of file upload. Let me know once it's uploaded!
-
-
-Index
-Code · HTML 
-okay that worked. now what is the next steps
-
-3:57 PM
-Great, you're live! Here's what to do next in order:
-
-1. Add your players
-
-For each player, do two things in Supabase:
-
-Authentication → Users → Add user → Create new user
-Email: username@landunited.internal (e.g. marcus_r@landunited.internal)
-Password: their 4-digit PIN
-SQL Editor → New query — run this for each player:
-sql
-insert into public.profiles (id, username, display_name, is_coach)
-values (
-  'PASTE-THEIR-UUID-HERE',
-  'marcus_r',
-  'Marcus R.',
-  false
-);
-The UUID comes from Authentication → Users — it's the long string next to their name.
-
-Repeat for every player on your squad.
-
-2. Test a player login
-
-Once you've added one player, open your GitHub Pages site in a private/incognito window and log in with their username and PIN to make sure it works before sharing with the whole squad.
-
-3. Post your first challenge
-
-Log in as coach → Coach tab → fill in the title, description, paste your YouTube demo link, set the points → hit Publish Challenge Now.
-
-4. Share the link
-
-Send your GitHub Pages URL to the squad along with their individual usernames and PINs.
-
-Start with step 1 — how many players do you have?
-
-I want to add my players first but I will want to make it so that the weekly video gets shared at the same time every Monday. I want this to happen automatically instead of me having to login and upload it and publish it manually. Is this possible?
-
-3:59 PM
-Yes, absolutely possible. The way it would work is:
-
-You prepare your challenges in advance (title, description, YouTube link, points) and schedule them with a date
-Every Monday at your chosen time, Supabase automatically activates that week's challenge
-This is done using Supabase Edge Functions combined with pg_cron (a built-in Supabase scheduler). It's a bit more involved to set up but totally doable and once it's running you never touch it again.
-
-Before I build it, a couple of quick questions:
-
-Q: What time Monday morning should the challenge go live?
-A: 9:00 AM
-
-Q: How far in advance would you want to schedule challenges?
-A: One at a time, week by week
-
-3:59 PM
-Perfect. Here's the plan — let's do it in two stages so we don't hold up adding your players today:
-
-Today:
-
-Add your players (do this now)
-I'll update the Coach panel to have a "Schedule for next Monday 9am" button instead of "Publish Now" — you prep the challenge, hit schedule, and it goes live automatically
-The scheduling works like this:
-
-You fill in the challenge as normal in the Coach tab
-Instead of publishing immediately, it saves it as "scheduled"
-Supabase runs a job every Monday at 9am that automatically activates it
-Let me build the updated index.html and the Supabase scheduler setup at the same time while you start adding players. I'll have it ready by the time you're done.
-
-Go ahead and start adding your players — how many do you have on the squad?
-
-13
-
-4:00 PM
-Go ahead and start adding them in Supabase — here's a quick reminder of the two steps per player:
-
-Step 1 — Authentication → Users → Add user → Create new user
-
-Email: firstname_lastname@landunited.internal (e.g. marcus_r@landunited.internal)
-Password: their 4-digit PIN
-Step 2 — SQL Editor → New query
-
-sql
-insert into public.profiles (id, username, display_name, is_coach)
-values ('THEIR-UUID', 'marcus_r', 'Marcus R.', false);
-To save time, once you have all 13 UUIDs you can do them all in one SQL query instead of 13 separate ones — just stack them like this:
-
-sql
-insert into public.profiles (id, username, display_name, is_coach)
-values 
-  ('UUID-1', 'player1_username', 'Player 1 Name', false),
-  ('UUID-2', 'player2_username', 'Player 2 Name', false),
-  ('UUID-3', 'player3_username', 'Player 3 Name', false);
-While you're doing that I'll build the scheduling feature. Give me a shout when you're done or if you hit any issues!
-
-I tried to do all 13 like you provided but it's providing an error. this is what i have. 
-
-insert into public.profiles (id, username, display_name, is_coach)
-values 
-  ('7aea5068-d231-4faa-9dc5-9eff8ea5a812', 'luke_d', 'Luke D', false),
-  ('79834646-41c7-4e89-b5e6-9514decb171a', 'wakefield_h', 'Wakefield H', false),
-  ('d698579e-2103-4c8f-851b-3240de79cd1d', 'srikrishna_c', 'Srikrishna C', false);
-  ('edea98a6-b06b-4329-9923-49c0177a9ff3', 'lucas_g', 'Lucas G', false);
-  ('6caf2ec3-5e3f-4e71-a3b0-e9ba829956e8', 'brody_h', 'Brody H', false);
-  ('23a4ee73-1cc4-4c6b-94c5-8ec5895cd4a4', 'justin_j', 'Justin J', false);
-  ('1e8a5fcc-fd83-48f1-826e-f85f399c8827', 'ashton_k', 'Ashton K', false);
-  ('a85f167c-0a14-47db-8661-3f777529010c', 'nole_k', 'Nole K', false);
-  ('d0de8c02-4a2b-42b4-83a4-853f5d040f16', 'makar_m', 'Makar M', false);
-  ('370346a2-9d8e-4429-8d5b-ef4275753a85', 'ronaldo_m', 'Ronaldo M', false);
-  ('6c78c04a-efb4-4e83-a7ca-40c424edd9e0', 'callum_m', 'Callum M', false);
-  ('fd4757fc-78fc-4317-99de-4dbafd142398', 'max_n', 'Max N', false);
-  ('5e0a61ec-e54c-47a8-bfe4-eae34e49b7c9', 'gage_p', 'Gage P', false);
-Show more
-4:23 PM
-I can see the issue — after the third row you switched from commas to semicolons between the rows. Only the very last row should have a semicolon. Here's the corrected version:
-
-
-Created a file, read a file
-Created a file, read a file
-Copy the contents of that file and paste it into the Supabase SQL Editor — it should run cleanly. Every row is separated by a comma, and only the very last one has a semicolon at the end.
-
-
-Add players
-Code · SQL 
-okay all of the players are added.
-
-4:24 PM
-Great, all 13 players are in! Now let's get the scheduling feature built so challenges go live automatically every Monday at 9am.
-
-This involves two things:
-
-A small update to the SQL schema to add a scheduled_for column to challenges
-Updating the Coach panel so you can schedule instead of publish immediately
-Let me build it all now.
-
-
-Create scheduling SQL setup file
-Create scheduling SQL setup file
-Now let me update the index.html with the scheduling UI in the Coach panel:
-
-
-Edited 2 files, viewed a file, read a file
-Edited 2 files, viewed a file, read a file
-Here's what you need to do — two steps:
-
-Step 1 — Run the SQL in Supabase
-
-Go to Supabase → SQL Editor → New query
-Paste the entire contents of scheduling-setup.sql and click Run
-This adds the scheduler and the auto-activate function
-Step 2 — Update GitHub with the new index.html
-
-Go to your GitHub repo → click index.html → pencil icon
-Select all → delete → paste the new index.html
-Commit changes
-Once that's done, your Coach panel will have two buttons when posting a challenge:
-
-🚀 Publish Now — goes live immediately (useful for testing)
-📅 Schedule Monday 9am — saves it and Supabase activates it automatically next Monday at 9am
-One thing to note — the SQL file is set to 9am Eastern time. Are you in the Eastern timezone, or do I need to adjust it for somewhere else?
-
-
-Index
-Code · HTML 
-
-Scheduling setup
-Code · SQL 
-Eastern Timezone is perfect
-
-4:29 PM
-Perfect, no changes needed then.
-
-Go ahead and run the scheduling-setup.sql in Supabase first, then swap in the new index.html on GitHub. Let me know when both are done and we'll do a quick test to make sure everything is working!
-
-alright everything seems to be working
-
-4:31 PM
-Excellent! You're fully up and running. Here's a summary of what your platform can do right now:
-
-Players can:
-
-Log in with their username and PIN
-Watch your demo video
-Submit their YouTube link for review
-See their approval status and points
-You as coach can:
-
-Post a challenge immediately or schedule it for Monday 9am automatically
-Watch each player's submitted video embedded in the coach panel
-Approve or reject submissions with an optional note
-See the live leaderboard
-Your weekly routine from here is simple:
-
-Film your demo, upload it to YouTube (can be unlisted)
-Log into the site as coach any time during the week
-Fill in the challenge details, paste your YouTube link
-Hit 📅 Schedule Monday 9am — done, it goes live automatically
-Whenever you have a new idea to add — notifications, a past challenges archive, streak bonuses, anything — just come back here and describe it and I'll update the file for you.
-
-Good luck with the first challenge! 🏆
-
-so it's currently only set up for the player to complete the weekly challenge. I am trying to get the players to get on the ball every single day. I also want the players to be able to do a daily challenge, which will also be a video submission. The daily challenge will not change and is simply a player passing up against a wall 500 times with both feet for a total of 1000 passes and 1000 times the player is receiving the ball.
-
-4:33 PM
-Love it — so you want two types of challenges running side by side:
-
-Weekly challenge — changes every Monday, coach picks it, players submit a YouTube link
-Daily challenge — permanent, never changes, players submit a YouTube link each day showing their 1000 passes (500 each foot)
-Before I build it, a couple of quick questions:
-
-Q: How many points should a player earn for completing the daily challenge?
-A: 10 pts
-
-Q: Can a player submit the daily challenge multiple times in one day, or just once per day?
-A: Once per day only
-
-Q: Should completed daily challenges show on the leaderboard separately, or just add to the player's overall points total?
-A: Add to overall points total
-
-4:34 PM
-Perfect. Here's what I'll build:
-
-A new Daily tab alongside the weekly challenge
-Players see the permanent challenge description and submit a YouTube link once per day
-10 pts added to their overall total when you approve it
-The app blocks a second submission on the same day
-Your coach panel gets a second approval queue for daily submissions
-Let me build it now.
-
-
-Read current index.html to update it
-Read current index.html to update it
-Good, I have the full file. Now I'll add the daily challenge table to SQL and rebuild the full index.html with the new Daily tab.
-
-
-Ran 2 commands, read a file
-Ran 2 commands, read a file
-Two things to do:
-
-Step 1 — Run the SQL in Supabase
-
-Go to Supabase → SQL Editor → New query
-Paste the contents of daily-challenge-setup.sql and click Run
-Step 2 — Update GitHub
-
-Go to your GitHub repo → index.html → pencil icon
-Select all → delete → paste the new index.html
-Commit changes
-Once that's done here's what's new:
-
-A Daily tab appears between Weekly and Leaderboard
-Players see the Wall Pass 1000 challenge description every day with a fresh YouTube link input
-The app automatically blocks a second submission on the same day
-Players see a counter showing how many days they've completed
-Your Coach panel shows both weekly and daily submissions mixed together, with a coloured badge so you can tell them apart — WEEKLY in peach, DAILY in blue
-
-Index
-Code · HTML 
-
-Daily challenge setup
-Code · SQL 
-I got this error when running the daily challenge set up sql "Error: Failed to run sql query: ERROR: 42P17: generation expression is not immutable"
-
-4:40 PM
-The generated always as column is causing that error because Supabase doesn't allow it in that form. Easy fix — just use a regular date column and set it on insert instead. Run this SQL instead:
-
-
-Ran a command, read a file
-Ran a command, read a file
-Paste that into Supabase SQL Editor and run it — should go through cleanly this time. The submitted_date column now just defaults to the current date on insert rather than being auto-generated, which Supabase is happy with.
-
-
-Daily challenge setup
-Code · SQL 
-Is there a way as a coach to manually add or remove points from a player? Also - I think we should add in a streak bonus. If a player does the daily challenge 5 days in a row, he gets an extra 10 points.
-
-4:43 PM
-Both great ideas. Here's how I'll build them:
-
-Manual points — a section in the Coach panel where you pick a player, enter a points amount (positive to add, negative to remove), add an optional note, and hit apply.
-
-Streak bonus — when you approve a daily submission, the app checks if that player has done 5 or more consecutive days. If yes, it automatically adds the 10 point bonus on top of the usual 10.
-
-Let me build both now.
-
-
-Viewed 3 files
-Viewed 3 files
-Good, I have everything I need. I'll update the approveSub function with streak detection and add the manual points section to the coach panel.
-
-
-Ran 6 commands, edited a file
-Ran 6 commands, edited a file
-The file got wiped during the edit. Let me rebuild it cleanly with all features included from scratch.
-
-
-Ran 2 commands, read a file
-Ran 2 commands, read a file
-Here's the updated file. Upload it to GitHub the usual way. Here's what's new:
-
-Streak bonus — when you approve a daily submission, the app automatically checks if that player has 5 consecutive approved days. If yes, it adds an extra 10 pts silently and a gold toast message appears in your coach panel saying "5-day streak bonus awarded." Players also see on the Daily tab how many days until their next streak bonus.
-
-Manual points adjustment — a new section in the Coach panel with a player dropdown, a points field (positive to add, negative to deduct), and an optional reason. Hit Apply and it updates instantly.
-
-No SQL changes needed — both features use the existing add_points function you already have.
-
-
-Index
-Code · HTML 
-i uploaded that html but im not seeing the manual points adjustment when i go in
-
-4:52 PM
-The coach panel only loads when you click into it, and the player dropdown is populated from Supabase at that moment. A couple of things to check:
-
-Do you see the Adjust player points section at all when you scroll down in the Coach tab, or is it completely missing? And do you see the pending approvals and post challenge sections loading correctly above it?
-
-Yes I see the pending approvals and post challenge section. I'm not seeing the adjust player points section. Maybe I uploaded the wrong html?
-
-4:53 PM
-That's likely it — the file may not have saved properly before you uploaded. Download the index.html I just generated above and upload that one fresh to GitHub.
-
-To double-check it's the right one, once you've uploaded open the GitHub repo, click on index.html, and press Ctrl+F and search for adj-player — if that text appears, you have the right version.
-
-okay it's there
-
-4:56 PM
-Great — so the section is in the file but not showing up on the page. The issue is likely that the buildCoachHTML function has a bug where the string concatenation gets cut off before reaching the adjust points section.
-
-Try this — open your browser console (F12) on the Coach tab and run:
-
-javascript
-document.getElementById('coach-content').innerHTML.includes('adj-player')
-What does it return — true or false?
-
-I said that it's there, meaning we're all good
-
-4:57 PM
-Ah, my mistake — you meant the section is showing up on the site! Great, everything is working then.
-
-So you now have:
-
-✅ Weekly challenges with scheduling
-✅ Daily Wall Pass 1000 challenge
-✅ Streak bonus (every 5 days = +10 pts automatically)
-✅ Manual points adjustment
-✅ Leaderboard
-✅ All 13 players added
-You're fully set up! What would you like to add or change next?
-
-it might make sense to give access to the assistant coach as well as all of the parents who want to look. The parents will only need access to the leaderboard. The assistant coach should also only have access to the leaderboard. I, as the primary coach, want to be the only one who is able to approve videos and add/subtract points
-
-4:58 PM
-Makes sense. Here's how I'll set it up:
-
-Primary coach (you) — full access, everything as it is now
-Assistant coach — leaderboard only (same as parents)
-Parents — leaderboard only, no login required — just a separate public URL they can bookmark
-The cleanest approach for parents is a separate public leaderboard page that requires no login at all. That way you don't need to create accounts for every parent, and they can bookmark it and check anytime.
-
-A couple of quick questions first:
-
-Q: Should the parent leaderboard be fully public (no login needed)?
-A: No -- I want parents to log in with a PIN too but they can all be given the same username and pin
-
-Q: What should parents and the assistant coach be able to see?
-A: Leaderboard + see the current weekly challenge
-
-4:59 PM
-Perfect. So I'll add two new account types:
-
-viewer role — shared username/PIN for parents and assistant coach, sees leaderboard + current weekly challenge only, no submission ability
-The login screen looks the same for everyone, the app just shows different tabs based on their role
-Let me build it now.
-
-
-Check current profiles table setup and roles
-Check current profiles table setup and roles
-Good. I need to add a is_viewer column to the profiles table and create the viewer account. Let me generate both the SQL and updated HTML together.
-
-
-Create viewer setup SQL
-Create viewer setup SQL
-Now let me update the HTML to handle the viewer role:
-
-
-Ran 4 commands, read a file
-Ran 4 commands, read a file
-Two things to do:
-
-Step 1 — Set up the viewer account in Supabase
-
-Go to Authentication → Users → Add user
-Email: viewer@landunited.internal
-Password: your chosen PIN (e.g. 0000)
-Copy the UUID
-Go to SQL Editor, open viewer-setup.sql, paste the UUID in, and run it
-Step 2 — Update GitHub with the new index.html
-
-Once done, viewers log in with:
-
-Username: viewer
-PIN: whatever you set
-They'll see the Weekly and Leaderboard tabs only — no Daily tab, no submission button, just a read-only view of the current challenge with your demo video, and the full leaderboard. You can share the same username and PIN with as many parents and your assistant coach as you like.
-
-
-Index
-Code · HTML 
-
-Viewer setup
-Code · SQL 
-It's working. I'm trying to think if there are any other fun things we can do from a points perspective or to get more engagement from the kids
-
-5:17 PM
-Great question! Here are some ideas across a few different angles:
-
-Points & rewards
-
-Perfect week bonus — if a player completes the daily challenge all 7 days in a week, they get a big bonus (e.g. 50 pts)
-Weekly challenge speed bonus — the first player to submit each week gets extra points on top of the early bird tiers
-Monthly reset leaderboard — points reset each month so players who start late can still compete, while keeping a season total separately
-Milestone badges — hit 100 pts, 250 pts, 500 pts and get a badge shown on the leaderboard next to their name
-Engagement
-
-Coach shoutout — when you approve a video you can optionally write a public shoutout that shows up on the leaderboard for that player ("Great technique this week!")
-Photo of the week — alongside the weekly challenge you pin one player's approved video to a "highlight" spot visible to everyone including parents
-Countdown timer — players see a live countdown to when the next Monday challenge drops, creates anticipation
-Personal stats page — each player can tap their own name on the leaderboard and see their full history, total days completed, points breakdown
-Competition
-
-Head to head — you pair two players each week, whoever scores more points that week wins a small bonus
-Team challenges — split the squad into two teams, compare total points, winning team gets a bonus multiplier
-Which of these jump out at you? Some are quick to add, others are bigger builds — happy to do any of them.
-
-I really like the idea of a countdown timer and a personal stats page.
-
-5:18 PM
-Great choices — both will add a lot. Let me build them both now.
-
-Countdown timer — shows on the Weekly tab for all players, counting down days/hours/minutes/seconds to the next Monday 9am challenge drop. Updates live every second.
-
-Personal stats page — players tap their name on the leaderboard to see their full breakdown: total points, weekly challenges completed, daily challenge history, current streak, and points earned over time.
-
-Let me build both now.
-
-
-Viewed 2 files
-Viewed 2 files
-Good. Now I have everything I need. Let me apply both features in one go:
-
-
-Ran 3 commands
-Ran 3 commands
-Good — renderChallenge ends with } before renderSubmissionArea. I just need to add startCountdown() inside it before the closing brace.
-
-
-Ran 4 commands, read a file
-Ran 4 commands, read a file
-Upload that to GitHub the usual way. Here's what's new:
-
-Countdown timer — appears on the Weekly tab below the challenge card. It counts down days, hours, minutes, and seconds live in real time to the next Monday 9am. Updates every second automatically.
-
-Personal stats page — on the Leaderboard tab, every player row now has a small arrow on the right and is tappable. Tap any player and you see their full breakdown — total points, week streak, weekly challenges completed, daily sessions completed, plus a full history of their recent weekly and daily submissions with dates and points earned. A back button returns to the leaderboard. This works for all account types — players can see their own stats, parents and the assistant coach can tap anyone.
-
-
-Index
-Code · HTML 
-something weird is happening on login screen. i type in username and pin and when i hit sign in nothing happens. i tried in incognito mode and it is doing the same thing
-
-5:25 PM
-Open the browser console (F12 → Console tab), try to log in, and tell me what error messages appear. That'll tell us exactly what's breaking.
-
-Uncaught SyntaxError: Unexpected identifier 'leaderboard'
-Land-United-FC-U12-Gold/:135 Uncaught ReferenceError: doLogin is not defined
-    at HTMLButtonElement.onclick (Land-United-FC-U12-Gold/:135:68)
-
-5:26 PM
-The syntax error on line 135 is breaking the whole script — doLogin never gets defined because JavaScript stops loading when it hits the error. The "Unexpected identifier 'leaderboard'" means there's a broken string or missing quote somewhere in the code around the leaderboard rows we made clickable.
-
-Let me fix it now.
-
-
-Find the broken leaderboard row code
-Find the broken leaderboard row code
-Found it — line 615. The switchTab('leaderboard') inside the onclick uses single quotes inside a single-quoted string, breaking the JavaScript.
-
-
-Ran a command, read a file
-Ran a command, read a file
-Upload that to GitHub. The fix was a single quote inside a single-quoted string on the back button — it was enough to crash the entire JavaScript file before it even started, which is why login wasn't working at all.
-
-
-Index
-Code · HTML 
-same issue is occurring. the error is now saying the following
-
-Uncaught ReferenceError: doLogin is not defined
-    at HTMLButtonElement.onclick (Land-United-FC-U12-Gold/:135:68)
-
-5:29 PM
-The syntax error is gone but something else is still breaking the script before doLogin gets defined. Let's see the full console output — are there any other errors listed above that ReferenceError? Anything red at all before it?
-
-no
-
-5:30 PM
-That means the script is loading but something in it is causing a silent failure. Let me check for any other quote issues in the file:
-
-
-Ran 4 commands
-Ran 4 commands
-No syntax errors. So the JS itself is clean. The problem must be the script loading order — the credentials <script> block or the Supabase CDN script is somehow not running before the main script. Let me check the top of the file:
-
-
-Viewed 2 files
-Viewed 2 files
-The script order looks correct. The issue is likely that GitHub Pages is still serving the old cached version of the file. Let me check — when you view the source on your GitHub Pages URL, what line 135 says. You can do this by:
-
-Go to your GitHub Pages URL
-Right-click → View Page Source
-Press Ctrl+F and search for doLogin
-Does it appear in the source? And does the source show the countdown timer code anywhere?
-
-
-<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <title>Land United FC — Challenges</title> <link rel="preconnect" href="https://fonts.googleapis.com" /> <link href="https://fonts.googleapis.com/css2?fa
-
-pasted
-
-Here is the source:
-
-5:32 PM
-That's the very old version of the file — it still has video file upload instead of YouTube links, no Daily tab, no countdown, nothing. GitHub is serving a completely outdated file.
-
-The issue is that GitHub Pages caches aggressively. When you edited the file in GitHub, it may not have actually saved the new content, or it saved to a different branch.
-
-Let's fix this properly:
-
-Go to your GitHub repo
-Click on index.html
-Look at the file content shown — does it show the old video upload code or the newer YouTube link code?
-If it shows the old code, the file was never updated. If it shows new code, GitHub Pages is just serving a cached version and we need to force a refresh.
-
-Which is it?
-
-how do i look for the newer youtube link code
-
-5:32 PM
-Search for the word youtube using Ctrl+F on the GitHub page showing the file contents. If you see it, you have the new version. If nothing is found, you have the old version and the file was never properly updated.
-
-should i just try and upload the most recent index.html file again and see if it works?
-
-5:33 PM
-Yes — that's the simplest fix. Here's the cleanest way to do it:
-
-Go to your GitHub repo
-Click on index.html
-Click the pencil icon (Edit file)
-Press Ctrl+A to select everything
-Delete it all
-Open the index.html I gave you in a text editor, press Ctrl+A to select all, Ctrl+C to copy
-Paste it into GitHub
-Scroll down and click Commit changes
-Then wait 60 seconds and hard refresh your site with Ctrl+Shift+R (clears the cache). Let me know what happens!
-
-okay that worked and was able to login. I'm not seeing the countdown, however, and on the leaderboard i see the right triangle to click into each player; however, when i click on it it doesnt do anything. is that because there are no stats yet or because it's not working correctly?
-
-5:38 PM
-Good progress! Two separate issues:
-
-Countdown not showing — it only appears after an active challenge is loaded. Do you have an active challenge posted? If the Weekly tab shows "No active challenge yet" then the countdown won't appear. Post a test challenge from the Coach tab and it should show up.
-
-Stats page not opening — that's a bug, not a data issue. It would still open even with no stats. The click handler is likely broken due to player names that contain special characters or spaces. Let me fix it now.
-
-
-Find the showStats click handler
-Find the showStats click handler
-The inline onclick with nested quotes is the problem — player names with spaces break it. I'll fix it by storing players in a lookup and using a data attribute instead.
-
-
-Ran 2 commands
-Ran 2 commands
-Clean. No syntax errors.
-
-
-Presented file
-Presented file
-Upload that to GitHub. Both fixes are in:
-
-Stats page — clicking a player row now uses a safe data attribute approach instead of inline quotes, so names with spaces or apostrophes won't break it
-Countdown — post a challenge from the Coach tab and it will appear on the Weekly tab automatically
-
-Index
-Code · HTML 
-
-
-
-
-
-Claude is AI and can make mistakes. Please double-check responses.
-Index · HTML
-Copy
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1514,7 +124,7 @@ a.watch-yt:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
- 
+
 <div id="login-screen">
   <div class="login-card">
     <div class="login-crest"><img id="login-crest-img" src="" alt="Land United FC" /></div>
@@ -1527,7 +137,7 @@ a.watch-yt:hover{text-decoration:underline;}
     <p style="font-size:11px;color:var(--muted);margin-top:18px;">Forgotten your PIN? Contact your coach.</p>
   </div>
 </div>
- 
+
 <div id="app" style="display:none">
   <header class="site-header">
     <div class="header-top">
@@ -1563,19 +173,19 @@ a.watch-yt:hover{text-decoration:underline;}
     <div class="view" id="view-stats"><div id="stats-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
   </div>
 </div>
- 
+
 <script>
 const { createClient } = supabase
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON)
 let currentSession=null,currentProfile=null,activeChallenge=null,playerYouTubeId=null,dailyYouTubeId=null,coachYouTubeId=null,playerLookup={}
- 
+
 document.getElementById('login-crest-img').src=CREST_URL
 document.getElementById('header-crest-img').src=CREST_URL
 sb.auth.getSession().then(({data})=>{ if(data.session) bootApp(data.session) })
 sb.auth.onAuthStateChange((_e,session)=>{ if(session&&!currentSession) bootApp(session); else if(!session) showLogin() })
 document.getElementById('login-pin').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin() })
 document.getElementById('login-user').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('login-pin').focus() })
- 
+
 async function bootApp(session) {
   currentSession=session
   const {data:profile}=await sb.from('profiles').select('*').eq('id',session.user.id).single()
@@ -1608,7 +218,7 @@ async function doLogin(){
   if(error){showErr(err,'Incorrect username or PIN.');btn.disabled=false;btn.textContent='Sign In'}
 }
 async function doSignOut(){await sb.auth.signOut()}
- 
+
 function switchTab(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'))
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'))
@@ -1623,7 +233,7 @@ function switchTab(name){
     else loadChallenge()
   }
 }
- 
+
 function extractYouTubeId(url){
   if(!url) return null; url=url.trim()
   let m=url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/); if(m) return m[1]
@@ -1633,7 +243,7 @@ function extractYouTubeId(url){
   return null
 }
 function ytEmbed(id){return 'https://www.youtube-nocookie.com/embed/'+id+'?rel=0&modestbranding=1'}
- 
+
 /* WEEKLY CHALLENGE */
 async function loadChallenge(){
   const el=document.getElementById('challenge-content')
@@ -1685,7 +295,7 @@ async function submitYouTube(){
     document.getElementById('submission-area').innerHTML=renderSubmissionArea(sub,activeChallenge)
   }catch(e){errEl.style.display='block';errEl.textContent='Something went wrong. Please try again.';btn.disabled=false;btn.textContent='Submit for Coach Review';console.error(e)}
 }
- 
+
 /* DAILY CHALLENGE */
 /* VIEWER CHALLENGE VIEW */
 async function loadViewerChallenge(){
@@ -1703,7 +313,7 @@ async function loadViewerChallenge(){
     +'</div><div style="padding:12px 14px;background:var(--peach-pale);border:1px solid rgba(232,168,124,.25);border-radius:var(--radius-sm);font-size:13px;color:var(--muted)">&#128064; View only &mdash; players submit via their own accounts</div></div>'
   }catch(e){el.innerHTML='<p class="text-muted">Could not load challenge.</p>';console.error(e)}
 }
- 
+
 async function loadDaily(){
   const el=document.getElementById('daily-content')
   el.innerHTML='<div class="loading-center"><div class="spinner"></div></div>'
@@ -1756,7 +366,7 @@ async function submitDaily(){
     btn.disabled=false;btn.textContent='Submit Today\'s Session';console.error(e)
   }
 }
- 
+
 /* LEADERBOARD */
 async function loadLeaderboard(){
   const el=document.getElementById('lb-content')
@@ -1775,7 +385,7 @@ async function loadLeaderboard(){
     el.innerHTML='<div class="lb-stats"><div class="stat-card"><div class="stat-num">'+total+'</div><div class="stat-lbl">Players</div></div><div class="stat-card"><div class="stat-num">'+onStreak+'</div><div class="stat-lbl">On a streak</div></div><div class="stat-card"><div class="stat-num">'+pct+'%</div><div class="stat-lbl">Participation</div></div></div>'+(rows||'<p class="text-muted" style="text-align:center;padding-top:20px">No players yet.</p>')
   }catch(e){el.innerHTML='<p class="text-muted">Could not load leaderboard.</p>';console.error(e)}
 }
- 
+
 /* COACH PANEL */
 async function loadCoachPanel(){
   const el=document.getElementById('coach-content')
@@ -1789,12 +399,12 @@ async function loadCoachPanel(){
     el.innerHTML=buildCoachHTML(weeklyPending||[],dailyPending||[],players||[])
   }catch(e){el.innerHTML='<p class="text-muted">Could not load coach panel.</p>';console.error(e)}
 }
- 
+
 function buildCoachHTML(weeklyPending,dailyPending,players){
   const allPending=[...weeklyPending.map(s=>({...s,_type:'weekly'}))]
   dailyPending.forEach(s=>allPending.push({...s,_type:'daily'}))
   allPending.sort((a,b)=>new Date(a.submitted_at)-new Date(b.submitted_at))
- 
+
   const pendingRows=allPending.length===0
     ?'<p style="font-size:13px;color:var(--muted);padding-bottom:4px">All caught up.</p>'
     :allPending.map(sub=>{
@@ -1807,29 +417,29 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
       const label=isDaily?'Daily — Wall Pass 1000':esc(sub.challenges?.title||'—')
       return '<div class="pending-row" id="pr-'+sub._type+'-'+sub.id+'"><div class="flex-1"><div style="font-size:13px;font-weight:500">'+esc(sub.profiles?.display_name||'—')+badge+'</div><div style="font-size:11px;color:var(--muted);margin-top:1px">'+label+' &middot; '+fmt+(bonus>0?' &middot; <span style="color:var(--green)">+'+bonus+' early bird</span>':'')+'</div>'+(ytId?'<div style="margin-top:8px;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--card-border);"><iframe src="'+ytEmbed(ytId)+'" width="100%" height="100%" style="border:none;display:block;" allowfullscreen loading="lazy"></iframe></div><a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer" style="margin-top:5px">Open in YouTube &#8599;</a>':'')+'<div id="actions-'+sub._type+'-'+sub.id+'" style="display:flex;gap:6px;margin-top:10px"><button class="btn-approve" onclick="approveSub(\''+sub.id+'\',\''+sub._type+'\','+pts+')">&#10003; Approve (+'+pts+' pts)</button><button class="btn-reject" onclick="showRejectForm(\''+sub.id+'\',\''+sub._type+'\')">&#10007; Reject</button></div></div></div>'
     }).join('')
- 
+
   const playerOptions=players.map(p=>'<option value="'+p.id+'">'+esc(p.display_name)+'</option>').join('')
- 
+
   return '<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Pending approvals'+(allPending.length>0?' ('+allPending.length+')':'')+'</div><div id="pending-list">'+pendingRows+'</div><div id="streak-toast" class="toast streak-toast" style="display:none">&#128293; 5-day streak bonus! +'+STREAK_BONUS+' pts awarded automatically!</div></div>'
- 
+
   +'<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Adjust player points</div>'
   +'<div class="card" style="margin-bottom:0"><p style="font-size:12px;color:var(--muted);margin-bottom:12px">Add or remove points manually. Use a negative number to deduct (e.g. -10).</p>'
   +'<div class="field"><label>Player</label><select id="adj-player"><option value="">Select a player...</option>'+playerOptions+'</select></div>'
   +'<div class="pts-grid"><div class="field" style="margin-bottom:0"><label>Points (+add / -deduct)</label><input id="adj-pts" type="number" placeholder="e.g. 10 or -10" /></div><div class="field" style="margin-bottom:0"><label>Reason (optional)</label><input id="adj-reason" type="text" placeholder="e.g. Bonus for effort" /></div></div>'
   +'<button class="btn-primary" id="adj-btn" onclick="adjustPoints()" style="margin-top:14px">&#9889; Apply Points</button><div id="adj-toast" style="display:none" class="toast">&#10003; Points updated!</div><div id="adj-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div></div></div>'
- 
+
   +'<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Post new weekly challenge</div>'
   +'<div class="card" style="margin-bottom:0"><div class="field"><label>Challenge title</label><input id="c-title" placeholder="e.g. Juggling Gauntlet" /></div><div class="field"><label>Description</label><textarea id="c-desc" rows="3" placeholder="Describe the challenge clearly..."></textarea></div>'
   +'<div class="field"><label>Your demo video — paste the YouTube link</label><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="coach-yt-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleCoachYTInput(this.value)" /></div><div id="coach-yt-feedback"></div><div id="coach-yt-preview" style="display:none;margin-top:8px"><div class="coach-yt-wrap"><iframe id="coach-yt-frame" src="" allowfullscreen loading="lazy"></iframe></div><button class="cancel-link" style="margin-top:4px" onclick="clearCoachYT()">&#10005; Remove</button></div></div>'
   +'<div class="admin-label" style="margin-top:4px">Point values</div><div class="pts-grid" style="margin-bottom:12px"><div class="field" style="margin-bottom:0"><label>Completion</label><input id="c-flat" type="number" value="50" min="0" /></div><div class="field" style="margin-bottom:0"><label>Day 1 bonus</label><input id="c-d1" type="number" value="20" min="0" /></div><div class="field" style="margin-bottom:0"><label>Day 2 bonus</label><input id="c-d2" type="number" value="10" min="0" /></div><div class="field" style="margin-bottom:0"><label>Day 3 bonus</label><input id="c-d3" type="number" value="5" min="0" /></div></div>'
   +'<div style="display:flex;gap:10px;margin-top:12px"><button class="btn-primary" id="post-btn" onclick="postChallenge(false)" style="margin-top:0">&#128640; Publish Now</button><button class="btn-primary" id="schedule-btn" onclick="postChallenge(true)" style="margin-top:0;background:var(--navy-mid);border:1px solid var(--peach);color:var(--white);font-size:16px">&#128197; Schedule Monday 9am</button></div>'
   +'<div id="post-toast" style="display:none" class="toast">&#10003; Challenge is live!</div><div id="schedule-toast" style="display:none" class="toast">&#128197; Scheduled for Monday 9am!</div><div id="post-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div></div></div>'
- 
+
   +'<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Add player to squad</div>'
   +'<div class="card" style="margin-bottom:0"><div class="field"><label>Display name</label><input id="p-name" placeholder="e.g. Marcus Rodriguez" /></div><div class="pts-grid"><div class="field" style="margin-bottom:0"><label>Username</label><input id="p-user" placeholder="marcus_r" autocapitalize="none" /></div><div class="field" style="margin-bottom:0"><label>PIN (4 digits)</label><input id="p-pin" type="password" inputmode="numeric" maxlength="4" placeholder="&#8226;&#8226;&#8226;&#8226;" /></div></div>'
   +'<button class="btn-primary" id="add-player-btn" onclick="addPlayer()" style="margin-top:14px">+ Add Player</button><div id="player-toast" style="display:none" class="toast">&#10003; Player added!</div><div id="player-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div></div></div>'
 }
- 
+
 /* APPROVE / REJECT */
 async function checkStreakBonus(playerId){
   const{data}=await sb.from('daily_submissions').select('submitted_date').eq('player_id',playerId).eq('status','approved').order('submitted_date',{ascending:false}).limit(STREAK_DAYS)
@@ -1876,7 +486,7 @@ async function confirmReject(subId,type){
     setTimeout(()=>{ if(row) row.remove() },350)
   }catch(e){ if(row) row.classList.remove('fading'); console.error(e) }
 }
- 
+
 /* MANUAL POINTS ADJUSTMENT */
 async function adjustPoints(){
   const playerId=document.getElementById('adj-player').value
@@ -1898,7 +508,7 @@ async function adjustPoints(){
     btn.disabled=false;btn.textContent='&#9889; Apply Points';console.error(e)
   }
 }
- 
+
 /* COACH DEMO YT */
 function handleCoachYTInput(val){
   const id=extractYouTubeId(val),fb=document.getElementById('coach-yt-feedback'),preview=document.getElementById('coach-yt-preview'),frame=document.getElementById('coach-yt-frame')
@@ -1907,7 +517,7 @@ function handleCoachYTInput(val){
   else{coachYouTubeId=null;fb.innerHTML='<div class="yt-invalid" style="margin-top:5px">Not a valid YouTube link.</div>';preview.style.display='none'}
 }
 function clearCoachYT(){coachYouTubeId=null;document.getElementById('coach-yt-input').value='';document.getElementById('coach-yt-feedback').innerHTML='';document.getElementById('coach-yt-preview').style.display='none';document.getElementById('coach-yt-frame').src=''}
- 
+
 /* POST CHALLENGE */
 function getNextMondayNineAM(){
   const now=new Date(),day=now.getDay(),daysUntil=day===1?7:(8-day)%7||7
@@ -1935,7 +545,7 @@ async function postChallenge(schedule){
     postBtn.disabled=false;schedBtn.disabled=false;postBtn.textContent='&#128640; Publish Now';schedBtn.textContent='&#128197; Schedule Monday 9am'
   }catch(e){errEl.style.display='block';errEl.textContent='Something went wrong. Try again.';postBtn.disabled=false;schedBtn.disabled=false;postBtn.textContent='&#128640; Publish Now';schedBtn.textContent='&#128197; Schedule Monday 9am';console.error(e)}
 }
- 
+
 /* ADD PLAYER */
 async function addPlayer(){
   const name=document.getElementById('p-name').value.trim(),user=document.getElementById('p-user').value.trim().toLowerCase(),pin=document.getElementById('p-pin').value.trim()
@@ -1949,7 +559,7 @@ async function addPlayer(){
     showToast('player-toast'); btn.disabled=false;btn.textContent='+ Add Player'
   }catch(e){errEl.style.display='block';errEl.textContent='Could not add player. Add them manually via Supabase dashboard.';btn.disabled=false;btn.textContent='+ Add Player';console.error(e)}
 }
- 
+
 /* COUNTDOWN */
 let countdownInterval=null
 function startCountdown(){
@@ -1979,7 +589,7 @@ function startCountdown(){
   tick()
   countdownInterval=setInterval(tick,1000)
 }
- 
+
 /* PLAYER STATS */
 function openStats(el){
   const pid=el.dataset.pid
@@ -2003,11 +613,11 @@ async function showStats(playerId,displayName,avatarColor){
     const dailyDone=(dailySubs||[]).filter(s=>s.status==='approved').length
     const totalPts=profile?.total_points||0
     const streak=profile?.current_streak||0
- 
+
     const weekRows=(weekSubs||[]).map(s=>'<div class="history-row"><div style="font-size:13px">'+esc(s.challenges?.title||'Challenge')+'</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--muted)">'+new Date(s.submitted_at).toLocaleDateString('en-GB',{month:'short',day:'numeric'})+'</span>'+(s.status==='approved'?'<span style="font-size:12px;color:var(--green)">+'+s.points_awarded+'</span>':s.status==='pending'?'<span style="font-size:11px;color:var(--peach)">pending</span>':'<span style="font-size:11px;color:var(--danger)">rejected</span>')+'</div></div>').join('')
- 
+
     const dailyRows=(dailySubs||[]).map(s=>'<div class="history-row"><div style="font-size:13px">Wall Pass 1000</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--muted)">'+s.submitted_date+'</span>'+(s.status==='approved'?'<span style="font-size:12px;color:var(--green)">+'+s.points_awarded+'</span>':s.status==='pending'?'<span style="font-size:11px;color:var(--peach)">pending</span>':'<span style="font-size:11px;color:var(--danger)">rejected</span>')+'</div></div>').join('')
- 
+
     el.innerHTML='<button class="stats-back" onclick="switchTab(&quot;leaderboard&quot;)">&#8592; Back to leaderboard</button>'
     +'<div class="stats-header"><div class="stats-avatar" style="background:'+col+'33;color:'+col+';border:2px solid '+col+'55">'+ini+'</div><div><div style="font-size:18px;font-weight:500">'+esc(displayName)+'</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Player stats</div></div></div>'
     +'<div class="stats-grid"><div class="stats-card"><div class="stats-num">'+totalPts+'</div><div class="stats-lbl">Total points</div></div><div class="stats-card"><div class="stats-num">'+streak+'</div><div class="stats-lbl">Week streak</div></div><div class="stats-card"><div class="stats-num">'+weekDone+'</div><div class="stats-lbl">Weekly completed</div></div><div class="stats-card"><div class="stats-num">'+dailyDone+'</div><div class="stats-lbl">Daily sessions</div></div></div>'
@@ -2015,7 +625,7 @@ async function showStats(playerId,displayName,avatarColor){
     +(dailyRows?'<div class="admin-label" style="margin-top:14px;margin-bottom:8px">Recent daily sessions</div>'+dailyRows:'')
   }catch(e){el.innerHTML='<p class="text-muted">Could not load stats.</p>';console.error(e)}
 }
- 
+
 /* HELPERS */
 function calcBonus(c,submittedAt){
   if(!c||!submittedAt) return 0
@@ -2029,6 +639,3 @@ function showToast(id){const t=document.getElementById(id);if(t){t.style.display
 </script>
 </body>
 </html>
- 
-
-
