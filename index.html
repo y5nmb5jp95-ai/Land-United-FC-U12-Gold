@@ -11,30 +11,10 @@
   const SUPABASE_URL  = 'https://okqehbtiyipbymbggpri.supabase.co'
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rcWVoYnRpeWlwYnltYmdncHJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMjM0ODMsImV4cCI6MjA5NDc5OTQ4M30.rOqD4NgCo1SMRa-yopsNLw7fl56pKepDEoHn6m44mkI'
   const CREST_URL     = 'https://okqehbtiyipbymbggpri.supabase.co/storage/v1/object/public/assets/land-united-crest.webp'
+  const DAILY_POINTS  = 10
 </script>
 <style>
-:root {
-  --navy:         #1e2157;
-  --navy-dark:    #12153a;
-  --navy-mid:     #252a6e;
-  --peach:        #e8a87c;
-  --peach-pale:   rgba(232,168,124,0.12);
-  --peach-light:  #f0c4a0;
-  --white:        #f5f5f2;
-  --muted:        rgba(245,245,242,0.52);
-  --card-bg:      rgba(255,255,255,0.06);
-  --card-border:  rgba(255,255,255,0.11);
-  --green:        #6ecf8a;
-  --green-bg:     rgba(110,207,138,0.12);
-  --green-border: rgba(110,207,138,0.28);
-  --danger:       #e06b5a;
-  --danger-bg:    rgba(224,107,90,0.12);
-  --danger-border:rgba(224,107,90,0.28);
-  --radius:       12px;
-  --radius-sm:    8px;
-  --font-d:       'Bebas Neue', sans-serif;
-  --font-b:       'DM Sans', sans-serif;
-}
+:root{--navy:#1e2157;--navy-dark:#12153a;--navy-mid:#252a6e;--peach:#e8a87c;--peach-pale:rgba(232,168,124,0.12);--peach-light:#f0c4a0;--white:#f5f5f2;--muted:rgba(245,245,242,0.52);--card-bg:rgba(255,255,255,0.06);--card-border:rgba(255,255,255,0.11);--green:#6ecf8a;--green-bg:rgba(110,207,138,0.12);--green-border:rgba(110,207,138,0.28);--danger:#e06b5a;--danger-bg:rgba(224,107,90,0.12);--danger-border:rgba(224,107,90,0.28);--radius:12px;--radius-sm:8px;--font-d:'Bebas Neue',sans-serif;--font-b:'DM Sans',sans-serif;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{min-height:100vh;background:var(--navy-dark);color:var(--white);font-family:var(--font-b);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;}
 #app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
@@ -48,7 +28,7 @@ html,body{min-height:100vh;background:var(--navy-dark);color:var(--white);font-f
 .week-badge{font-family:var(--font-d);font-size:15px;background:var(--peach);color:var(--navy-dark);padding:5px 12px;border-radius:var(--radius-sm);white-space:nowrap;}
 .signout-btn{background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-b);margin-top:4px;text-align:right;display:block;}
 .tab-nav{display:flex;margin-top:16px;}
-.tab-btn{flex:1;padding:10px 4px;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:var(--font-b);transition:color .15s,border-color .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.tab-btn{flex:1;padding:10px 2px;font-size:12px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:var(--font-b);transition:color .15s,border-color .15s;display:flex;align-items:center;justify-content:center;gap:4px;}
 .tab-btn.active{color:var(--peach);border-bottom-color:var(--peach);}
 .tab-btn svg{width:13px;height:13px;flex-shrink:0;}
 .tab-content{flex:1;padding:20px 16px;background:var(--navy-dark);}
@@ -60,6 +40,7 @@ html,body{min-height:100vh;background:var(--navy-dark);color:var(--white);font-f
 .pill-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;}
 .pill{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;background:var(--peach-pale);border:1px solid rgba(232,168,124,.32);color:var(--peach-light);display:flex;align-items:center;gap:4px;}
 .pill.green{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+.pill.blue{background:rgba(90,140,232,0.15);border-color:rgba(90,140,232,0.35);color:#8ab4f8;}
 .yt-input-wrap{position:relative;margin-bottom:8px;}
 .yt-input-wrap input{width:100%;padding:11px 12px 11px 40px;background:rgba(255,255,255,.07);border:1px solid var(--card-border);border-radius:var(--radius-sm);color:var(--white);font-size:14px;font-family:var(--font-b);transition:border-color .15s;}
 .yt-input-wrap input:focus{outline:none;border-color:var(--peach);}
@@ -120,6 +101,9 @@ html,body{min-height:100vh;background:var(--navy-dark);color:var(--white);font-f
 .cancel-link{background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-b);}
 a.watch-yt{font-size:12px;color:var(--peach);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px;}
 a.watch-yt:hover{text-decoration:underline;}
+.daily-banner{background:linear-gradient(135deg,rgba(90,140,232,0.15),rgba(90,140,232,0.05));border:1px solid rgba(90,140,232,0.3);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+.daily-streak-num{font-family:var(--font-d);font-size:36px;color:#8ab4f8;line-height:1;flex-shrink:0;}
+.coach-tab-divider{font-size:11px;font-weight:500;color:var(--peach);text-transform:uppercase;letter-spacing:.08em;padding:4px 0 10px;border-bottom:1px solid var(--card-border);margin-bottom:14px;}
 </style>
 </head>
 <body>
@@ -163,7 +147,11 @@ a.watch-yt:hover{text-decoration:underline;}
     <nav class="tab-nav">
       <button class="tab-btn active" onclick="switchTab('challenge')" id="tab-challenge-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        This week
+        Weekly
+      </button>
+      <button class="tab-btn" onclick="switchTab('daily')" id="tab-daily-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Daily
       </button>
       <button class="tab-btn" onclick="switchTab('leaderboard')" id="tab-leaderboard-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/></svg>
@@ -177,6 +165,7 @@ a.watch-yt:hover{text-decoration:underline;}
   </header>
   <div class="tab-content">
     <div class="view active" id="view-challenge"><div id="challenge-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
+    <div class="view" id="view-daily"><div id="daily-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
     <div class="view" id="view-leaderboard"><div id="lb-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
     <div class="view" id="view-coach"><div id="coach-content"><div class="loading-center"><div class="spinner"></div></div></div></div>
   </div>
@@ -190,6 +179,7 @@ let currentSession  = null
 let currentProfile  = null
 let activeChallenge = null
 let playerYouTubeId = null
+let dailyYouTubeId  = null
 let coachYouTubeId  = null
 
 document.getElementById('login-crest-img').src = CREST_URL
@@ -214,84 +204,85 @@ async function bootApp(session) {
   if (profile?.is_coach) document.getElementById('tab-coach-btn').style.display = ''
   loadChallenge()
 }
-
 function showLogin() {
-  currentSession = null; currentProfile = null
-  document.getElementById('login-screen').style.display = 'flex'
-  document.getElementById('app').style.display = 'none'
+  currentSession=null; currentProfile=null
+  document.getElementById('login-screen').style.display='flex'
+  document.getElementById('app').style.display='none'
 }
-
 async function doLogin() {
-  const user = document.getElementById('login-user').value.trim().toLowerCase()
-  const pin  = document.getElementById('login-pin').value.trim()
-  const err  = document.getElementById('login-err')
-  const btn  = document.getElementById('login-btn')
-  if (!user || pin.length < 4) { showErr(err,'Enter your username and 4-digit PIN.'); return }
+  const user=document.getElementById('login-user').value.trim().toLowerCase()
+  const pin=document.getElementById('login-pin').value.trim()
+  const err=document.getElementById('login-err')
+  const btn=document.getElementById('login-btn')
+  if (!user||pin.length<4) { showErr(err,'Enter your username and 4-digit PIN.'); return }
   btn.disabled=true; btn.textContent='Signing in…'; err.style.display='none'
-  const { error } = await sb.auth.signInWithPassword({ email: user+'@landunited.internal', password: pin })
+  const { error }=await sb.auth.signInWithPassword({ email:user+'@landunited.internal', password:pin })
   if (error) { showErr(err,'Incorrect username or PIN.'); btn.disabled=false; btn.textContent='Sign In' }
 }
 async function doSignOut() { await sb.auth.signOut() }
 
 function switchTab(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'))
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'))
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'))
   document.getElementById('view-'+name).classList.add('active')
   document.getElementById('tab-'+name+'-btn').classList.add('active')
   if (name==='leaderboard') loadLeaderboard()
   if (name==='coach') loadCoachPanel()
+  if (name==='daily') loadDaily()
 }
 
+/* ── YOUTUBE HELPERS ── */
 function extractYouTubeId(url) {
   if (!url) return null
-  url = url.trim()
-  let m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/)
+  url=url.trim()
+  let m=url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/)
   if (m) return m[1]
-  m = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
+  m=url.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
   if (m) return m[1]
-  m = url.match(/shorts\/([a-zA-Z0-9_-]{11})/)
+  m=url.match(/shorts\/([a-zA-Z0-9_-]{11})/)
   if (m) return m[1]
   if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url
   return null
 }
 function ytEmbed(id) { return `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1` }
 
+/* ══════════════════════════════════════════
+   WEEKLY CHALLENGE TAB
+══════════════════════════════════════════ */
 async function loadChallenge() {
-  const el = document.getElementById('challenge-content')
-  el.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>'
+  const el=document.getElementById('challenge-content')
+  el.innerHTML='<div class="loading-center"><div class="spinner"></div></div>'
   try {
-    const { data: c } = await sb.from('challenges').select('*').eq('is_active',true).limit(1).maybeSingle()
-    activeChallenge = c
+    const { data: c }=await sb.from('challenges').select('*').eq('is_active',true).limit(1).maybeSingle()
+    activeChallenge=c
     if (!c) { el.innerHTML='<p class="text-muted" style="text-align:center;padding-top:30px">No active challenge yet.<br>Check back Monday morning!</p>'; return }
-    const { data: sub } = await sb.from('submissions').select('*').eq('challenge_id',c.id).eq('player_id',currentSession.user.id).maybeSingle()
-    renderChallenge(el, c, sub)
+    const { data: sub }=await sb.from('submissions').select('*').eq('challenge_id',c.id).eq('player_id',currentSession.user.id).maybeSingle()
+    renderChallenge(el,c,sub)
   } catch(e) { el.innerHTML='<p class="text-muted">Could not load challenge.</p>'; console.error(e) }
 }
-
-function renderChallenge(el, c, sub) {
-  el.innerHTML = `
+function renderChallenge(el,c,sub) {
+  el.innerHTML=`
     <div class="card">
       <div class="section-title">${esc(c.title)}</div>
       <p class="section-desc">${esc(c.description)}</p>
-      ${c.demo_video_url ? `
+      ${c.demo_video_url?`
         <div class="demo-label">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
           Coach demo — watch before you attempt
         </div>
         <div class="yt-wrap"><iframe src="${ytEmbed(extractYouTubeId(c.demo_video_url))}" allowfullscreen loading="lazy"></iframe></div>
-      ` : ''}
+      `:''}
       <div class="pill-row">
         <span class="pill">⭐ ${c.flat_points} pts on completion</span>
         ${c.day1_bonus>0?`<span class="pill green">+${c.day1_bonus} pts if submitted day 1</span>`:''}
         ${c.day2_bonus>0?`<span class="pill green">+${c.day2_bonus} pts if submitted day 2</span>`:''}
         ${c.day3_bonus>0?`<span class="pill green">+${c.day3_bonus} pts if submitted day 3</span>`:''}
       </div>
-      <div id="submission-area">${renderSubmissionArea(sub, c)}</div>
+      <div id="submission-area">${renderSubmissionArea(sub,c)}</div>
     </div>
-    <p style="font-size:12px;color:var(--muted);text-align:center">Max possible this week: ${c.flat_points + c.day1_bonus} pts</p>`
+    <p style="font-size:12px;color:var(--muted);text-align:center">Max possible this week: ${c.flat_points+c.day1_bonus} pts</p>`
 }
-
-function renderSubmissionArea(sub, c) {
+function renderSubmissionArea(sub,c) {
   if (!sub) return `
     <div style="margin-bottom:4px;font-size:13px;font-weight:500">Submit your YouTube link</div>
     <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload your attempt to YouTube (can be unlisted), then paste the link below.</p>
@@ -305,44 +296,33 @@ function renderSubmissionArea(sub, c) {
     </div>
     <button class="btn-primary" id="submit-btn" onclick="submitYouTube()" disabled>Submit for Coach Review</button>
     <div id="submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>`
-
-  const bonus = calcBonus(c, sub.submitted_at)
-  const fmt = new Date(sub.submitted_at).toLocaleDateString('en-GB',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
-  const ytId = extractYouTubeId(sub.video_url)
-
+  const bonus=calcBonus(c,sub.submitted_at)
+  const fmt=new Date(sub.submitted_at).toLocaleDateString('en-GB',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+  const ytId=extractYouTubeId(sub.video_url)
   if (sub.status==='pending') return `
-    <div class="status-box pending">
-      <div class="flex-1">
-        <div style="font-weight:500;font-size:14px">⏳ Submitted — waiting for coach review</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px">Submitted ${fmt}${bonus>0?` · <span style="color:var(--green)">Early bird +${bonus} pts pending</span>`:''}</div>
-        ${ytId?`<a class="watch-yt" href="${sub.video_url}" target="_blank" rel="noreferrer">Watch on YouTube ↗</a>`:''}
-      </div>
-    </div>`
-
+    <div class="status-box pending"><div class="flex-1">
+      <div style="font-weight:500;font-size:14px">⏳ Submitted — waiting for coach review</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">Submitted ${fmt}${bonus>0?` · <span style="color:var(--green)">Early bird +${bonus} pts pending</span>`:''}</div>
+      ${ytId?`<a class="watch-yt" href="${sub.video_url}" target="_blank" rel="noreferrer">Watch on YouTube ↗</a>`:''}
+    </div></div>`
   if (sub.status==='approved') return `
-    <div class="status-box approved">
-      <div class="flex-1">
-        <div style="font-weight:500;font-size:14px;color:var(--green)">✓ Approved! +${sub.points_awarded} pts added</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px">${c.flat_points} base${bonus>0?` + ${bonus} early bird bonus`:''}</div>
-        ${ytId?`<a class="watch-yt" href="${sub.video_url}" target="_blank" rel="noreferrer">Watch on YouTube ↗</a>`:''}
-      </div>
-    </div>`
-
+    <div class="status-box approved"><div class="flex-1">
+      <div style="font-weight:500;font-size:14px;color:var(--green)">✓ Approved! +${sub.points_awarded} pts added</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">${c.flat_points} base${bonus>0?` + ${bonus} early bird bonus`:''}</div>
+      ${ytId?`<a class="watch-yt" href="${sub.video_url}" target="_blank" rel="noreferrer">Watch on YouTube ↗</a>`:''}
+    </div></div>`
   return `
-    <div class="status-box rejected">
-      <div class="flex-1">
-        <div style="font-weight:500;font-size:14px;color:var(--danger)">✗ Not approved this time</div>
-        ${sub.rejection_reason?`<div style="font-size:12px;color:var(--muted);margin-top:3px">Coach note: ${esc(sub.rejection_reason)}</div>`:''}
-      </div>
-    </div>`
+    <div class="status-box rejected"><div class="flex-1">
+      <div style="font-weight:500;font-size:14px;color:var(--danger)">✗ Not approved this time</div>
+      ${sub.rejection_reason?`<div style="font-size:12px;color:var(--muted);margin-top:3px">Coach note: ${esc(sub.rejection_reason)}</div>`:''}
+    </div></div>`
 }
-
 function handleYTInput(val) {
-  const id = extractYouTubeId(val)
-  const fb = document.getElementById('yt-feedback')
-  const preview = document.getElementById('yt-preview')
-  const frame = document.getElementById('yt-preview-frame')
-  const btn = document.getElementById('submit-btn')
+  const id=extractYouTubeId(val)
+  const fb=document.getElementById('yt-feedback')
+  const preview=document.getElementById('yt-preview')
+  const frame=document.getElementById('yt-preview-frame')
+  const btn=document.getElementById('submit-btn')
   if (!val.trim()) { fb.innerHTML=''; preview.style.display='none'; btn.disabled=true; playerYouTubeId=null; return }
   if (id) {
     playerYouTubeId=id
@@ -354,14 +334,13 @@ function handleYTInput(val) {
     preview.style.display='none'; btn.disabled=true
   }
 }
-
 async function submitYouTube() {
   if (!playerYouTubeId||!activeChallenge) return
   const btn=document.getElementById('submit-btn')
   const errEl=document.getElementById('submit-error')
   btn.disabled=true; btn.textContent='Submitting…'; errEl.style.display='none'
   try {
-    const { data: sub, error } = await sb.from('submissions').insert({
+    const { data: sub, error }=await sb.from('submissions').insert({
       challenge_id:activeChallenge.id, player_id:currentSession.user.id,
       video_url:`https://www.youtube.com/watch?v=${playerYouTubeId}`,
       status:'pending', submitted_at:new Date().toISOString()
@@ -375,11 +354,141 @@ async function submitYouTube() {
   }
 }
 
+/* ══════════════════════════════════════════
+   DAILY CHALLENGE TAB
+══════════════════════════════════════════ */
+async function loadDaily() {
+  const el=document.getElementById('daily-content')
+  el.innerHTML='<div class="loading-center"><div class="spinner"></div></div>'
+  try {
+    // Check if player already submitted today
+    const today=new Date().toISOString().slice(0,10)
+    const { data: todaySub }=await sb.from('daily_submissions')
+      .select('*').eq('player_id',currentSession.user.id)
+      .eq('submitted_date',today).maybeSingle()
+    // Get player's total daily submissions count (streak indicator)
+    const { count }=await sb.from('daily_submissions')
+      .select('*',{count:'exact',head:true})
+      .eq('player_id',currentSession.user.id)
+      .eq('status','approved')
+    renderDaily(el, todaySub, count||0)
+  } catch(e) { el.innerHTML='<p class="text-muted">Could not load daily challenge.</p>'; console.error(e) }
+}
+
+function renderDaily(el, todaySub, totalCompleted) {
+  const todayFmt=new Date().toLocaleDateString('en-GB',{weekday:'long',month:'long',day:'numeric'})
+  el.innerHTML=`
+    ${totalCompleted>0?`
+      <div class="daily-banner">
+        <div class="daily-streak-num">${totalCompleted}</div>
+        <div>
+          <div style="font-size:14px;font-weight:500">Days completed</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Keep the streak alive! 🔥</div>
+        </div>
+      </div>`:''}
+    <div class="card">
+      <div class="demo-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Daily challenge — every day
+      </div>
+      <div class="section-title">Wall Pass 1000</div>
+      <p class="section-desc">Complete 500 passes against a wall with your right foot and 500 with your left foot — 1000 passes total, receiving the ball each time. Film the full session in one continuous take and upload to YouTube.</p>
+      <div class="pill-row">
+        <span class="pill blue">🗓️ Today — ${todayFmt}</span>
+        <span class="pill">⭐ ${DAILY_POINTS} pts per day</span>
+      </div>
+      <div id="daily-submission-area">${renderDailyArea(todaySub)}</div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);text-align:center">Complete every day to maximise your points total</p>`
+}
+
+function renderDailyArea(sub) {
+  if (!sub) return `
+    <div style="margin-bottom:4px;font-size:13px;font-weight:500">Submit today's YouTube link</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload today's session to YouTube (can be unlisted), then paste the link below.</p>
+    <div class="yt-input-wrap">
+      <span class="yt-icon">▶️</span>
+      <input id="daily-yt-input" type="url" placeholder="https://youtube.com/watch?v=... or youtu.be/..." oninput="handleDailyYTInput(this.value)" />
+    </div>
+    <div id="daily-yt-feedback"></div>
+    <div id="daily-yt-preview" style="display:none">
+      <div class="yt-wrap" style="margin-bottom:8px"><iframe id="daily-yt-frame" src="" allowfullscreen loading="lazy"></iframe></div>
+    </div>
+    <button class="btn-primary" id="daily-submit-btn" onclick="submitDaily()" disabled>Submit Today's Session</button>
+    <div id="daily-submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>`
+
+  const fmt=new Date(sub.submitted_at).toLocaleDateString('en-GB',{hour:'2-digit',minute:'2-digit'})
+  const ytId=extractYouTubeId(sub.video_url)
+  if (sub.status==='pending') return `
+    <div class="status-box pending"><div class="flex-1">
+      <div style="font-weight:500;font-size:14px">⏳ Submitted today at ${fmt} — awaiting approval</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">+${DAILY_POINTS} pts will be added once approved</div>
+      ${ytId?`<a class="watch-yt" href="${sub.video_url}" target="_blank" rel="noreferrer">Watch on YouTube ↗</a>`:''}
+    </div></div>`
+  if (sub.status==='approved') return `
+    <div class="status-box approved"><div class="flex-1">
+      <div style="font-weight:500;font-size:14px;color:var(--green)">✓ Approved! +${DAILY_POINTS} pts added</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">Come back tomorrow to keep your streak going!</div>
+    </div></div>`
+  return `
+    <div class="status-box rejected"><div class="flex-1">
+      <div style="font-weight:500;font-size:14px;color:var(--danger)">✗ Not approved today</div>
+      ${sub.rejection_reason?`<div style="font-size:12px;color:var(--muted);margin-top:3px">Coach note: ${esc(sub.rejection_reason)}</div>`:''}
+      <div style="font-size:12px;color:var(--muted);margin-top:5px">You can resubmit tomorrow.</div>
+    </div></div>`
+}
+
+function handleDailyYTInput(val) {
+  const id=extractYouTubeId(val)
+  const fb=document.getElementById('daily-yt-feedback')
+  const preview=document.getElementById('daily-yt-preview')
+  const frame=document.getElementById('daily-yt-frame')
+  const btn=document.getElementById('daily-submit-btn')
+  if (!val.trim()) { fb.innerHTML=''; preview.style.display='none'; btn.disabled=true; dailyYouTubeId=null; return }
+  if (id) {
+    dailyYouTubeId=id
+    fb.innerHTML=`<div class="yt-valid">✓ YouTube link recognised — preview below</div>`
+    frame.src=ytEmbed(id); preview.style.display='block'; btn.disabled=false
+  } else {
+    dailyYouTubeId=null
+    fb.innerHTML=`<div class="yt-invalid">That doesn't look like a valid YouTube link.</div>`
+    preview.style.display='none'; btn.disabled=true
+  }
+}
+
+async function submitDaily() {
+  if (!dailyYouTubeId) return
+  const btn=document.getElementById('daily-submit-btn')
+  const errEl=document.getElementById('daily-submit-error')
+  btn.disabled=true; btn.textContent='Submitting…'; errEl.style.display='none'
+  try {
+    const { data: sub, error }=await sb.from('daily_submissions').insert({
+      player_id:currentSession.user.id,
+      video_url:`https://www.youtube.com/watch?v=${dailyYouTubeId}`,
+      status:'pending',
+      submitted_at:new Date().toISOString()
+    }).select().single()
+    if (error) throw error
+    dailyYouTubeId=null
+    document.getElementById('daily-submission-area').innerHTML=renderDailyArea(sub)
+  } catch(e) {
+    if (e.code==='23505') {
+      errEl.style.display='block'; errEl.textContent='You have already submitted today. Come back tomorrow!'
+    } else {
+      errEl.style.display='block'; errEl.textContent='Something went wrong. Please try again.'
+    }
+    btn.disabled=false; btn.textContent='Submit Today\'s Session'; console.error(e)
+  }
+}
+
+/* ══════════════════════════════════════════
+   LEADERBOARD TAB
+══════════════════════════════════════════ */
 async function loadLeaderboard() {
   const el=document.getElementById('lb-content')
   el.innerHTML='<div class="loading-center"><div class="spinner"></div></div>'
   try {
-    const { data: players } = await sb.from('profiles').select('id,display_name,total_points,current_streak,avatar_color').eq('is_coach',false).order('total_points',{ascending:false})
+    const { data: players }=await sb.from('profiles').select('id,display_name,total_points,current_streak,avatar_color').eq('is_coach',false).order('total_points',{ascending:false})
     const total=players.length
     const onStreak=players.filter(p=>p.current_streak>0).length
     const pct=total>0?Math.round(onStreak/total*100):0
@@ -406,46 +515,84 @@ async function loadLeaderboard() {
   } catch(e) { el.innerHTML='<p class="text-muted">Could not load leaderboard.</p>'; console.error(e) }
 }
 
+/* ══════════════════════════════════════════
+   COACH PANEL
+══════════════════════════════════════════ */
 async function loadCoachPanel() {
   const el=document.getElementById('coach-content')
   el.innerHTML='<div class="loading-center"><div class="spinner"></div></div>'
   try {
-    const { data: pending } = await sb.from('submissions')
-      .select('*, profiles(display_name), challenges(title,flat_points,day1_bonus,day2_bonus,day3_bonus,created_at)')
-      .eq('status','pending').order('submitted_at',{ascending:true})
-    el.innerHTML=buildCoachHTML(pending||[])
+    const [{ data: weeklyPending }, { data: dailyPending }] = await Promise.all([
+      sb.from('submissions').select('*, profiles(display_name), challenges(title,flat_points,day1_bonus,day2_bonus,day3_bonus,created_at)').eq('status','pending').order('submitted_at',{ascending:true}),
+      sb.from('daily_submissions').select('*, profiles(display_name)').eq('status','pending').order('submitted_at',{ascending:true})
+    ])
+    el.innerHTML=buildCoachHTML(weeklyPending||[], dailyPending||[])
   } catch(e) { el.innerHTML='<p class="text-muted">Could not load coach panel.</p>'; console.error(e) }
 }
 
-function buildCoachHTML(pending) {
-  const pendingRows=pending.length===0
-    ?'<p style="font-size:13px;color:var(--muted);padding-bottom:4px">All caught up — no pending submissions.</p>'
-    :pending.map(sub=>{
-      const fmt=new Date(sub.submitted_at).toLocaleDateString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit'})
-      const bonus=calcBonus(sub.challenges,sub.submitted_at)
-      const total=(sub.challenges?.flat_points||50)+bonus
-      const ytId=extractYouTubeId(sub.video_url)
-      return `<div class="pending-row" id="pr-${sub.id}">
-        <div class="flex-1">
-          <div style="font-size:13px;font-weight:500">${esc(sub.profiles?.display_name||'—')}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:1px">${esc(sub.challenges?.title||'—')} · ${fmt}${bonus>0?` · <span style="color:var(--green)">+${bonus} early bird</span>`:''}</div>
-          ${ytId?`
-            <div style="margin-top:8px;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--card-border);">
-              <iframe src="${ytEmbed(ytId)}" width="100%" height="100%" style="border:none;display:block;" allowfullscreen loading="lazy"></iframe>
-            </div>
-            <a class="watch-yt" href="${sub.video_url}" target="_blank" rel="noreferrer" style="margin-top:5px">Open in YouTube ↗</a>`:''}
-          <div id="actions-${sub.id}" style="display:flex;gap:6px;margin-top:10px">
-            <button class="btn-approve" onclick="approveSub('${sub.id}',${total})">✓ Approve (+${total} pts)</button>
-            <button class="btn-reject" onclick="showRejectForm('${sub.id}')">✕ Reject</button>
-          </div>
+function buildPendingRow(sub, type) {
+  const fmt=new Date(sub.submitted_at).toLocaleDateString('en-GB',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+  const ytId=extractYouTubeId(sub.video_url)
+  const isWeekly = type==='weekly'
+  const bonus = isWeekly ? calcBonus(sub.challenges, sub.submitted_at) : 0
+  const pts = isWeekly ? (sub.challenges?.flat_points||50)+bonus : DAILY_POINTS
+  const label = isWeekly ? esc(sub.challenges?.title||'—') : 'Daily — Wall Pass 1000'
+  return `<div class="pending-row" id="pr-${type}-${sub.id}">
+    <div class="flex-1">
+      <div style="font-size:13px;font-weight:500">${esc(sub.profiles?.display_name||'—')}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:1px">${label} · ${fmt}${bonus>0?` · <span style="color:var(--green)">+${bonus} early bird</span>`:''}</div>
+      ${ytId?`
+        <div style="margin-top:8px;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--card-border);">
+          <iframe src="${ytEmbed(ytId)}" width="100%" height="100%" style="border:none;display:block;" allowfullscreen loading="lazy"></iframe>
         </div>
-      </div>`}).join('')
+        <a class="watch-yt" href="${sub.video_url}" target="_blank" rel="noreferrer" style="margin-top:5px">Open in YouTube ↗</a>`:''}
+      <div id="actions-${type}-${sub.id}" style="display:flex;gap:6px;margin-top:10px">
+        <button class="btn-approve" onclick="approveSub('${sub.id}','${type}',${pts})">✓ Approve (+${pts} pts)</button>
+        <button class="btn-reject" onclick="showRejectForm('${sub.id}','${type}')">✕ Reject</button>
+      </div>
+    </div>
+  </div>`
+}
+
+function buildCoachHTML(weeklyPending, dailyPending) {
+  const allPending = [
+    ...weeklyPending.map(s=>({...s,_type:'weekly'})),
+    ...dailyPending.map(s=>({...s,_type:'daily'}))
+  ].sort((a,b)=>new Date(a.submitted_at)-new Date(b.submitted_at))
+
+  const pendingRows = allPending.length===0
+    ? '<p style="font-size:13px;color:var(--muted);padding-bottom:4px">All caught up — no pending submissions.</p>'
+    : allPending.map(sub=>{
+        const badge = sub._type==='daily'
+          ? '<span style="font-size:10px;background:rgba(90,140,232,0.2);color:#8ab4f8;border:1px solid rgba(90,140,232,0.3);padding:1px 6px;border-radius:10px;margin-left:5px">DAILY</span>'
+          : '<span style="font-size:10px;background:var(--peach-pale);color:var(--peach);border:1px solid rgba(232,168,124,0.3);padding:1px 6px;border-radius:10px;margin-left:5px">WEEKLY</span>'
+        const fmt=new Date(sub.submitted_at).toLocaleDateString('en-GB',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+        const ytId=extractYouTubeId(sub.video_url)
+        const bonus=sub._type==='weekly'?calcBonus(sub.challenges,sub.submitted_at):0
+        const pts=sub._type==='weekly'?(sub.challenges?.flat_points||50)+bonus:DAILY_POINTS
+        const label=sub._type==='weekly'?esc(sub.challenges?.title||'—'):'Daily — Wall Pass 1000'
+        return `<div class="pending-row" id="pr-${sub._type}-${sub.id}">
+          <div class="flex-1">
+            <div style="font-size:13px;font-weight:500">${esc(sub.profiles?.display_name||'—')}${badge}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:1px">${label} · ${fmt}${bonus>0?` · <span style="color:var(--green)">+${bonus} early bird</span>`:''}</div>
+            ${ytId?`
+              <div style="margin-top:8px;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--card-border);">
+                <iframe src="${ytEmbed(ytId)}" width="100%" height="100%" style="border:none;display:block;" allowfullscreen loading="lazy"></iframe>
+              </div>
+              <a class="watch-yt" href="${sub.video_url}" target="_blank" rel="noreferrer" style="margin-top:5px">Open in YouTube ↗</a>`:''}
+            <div id="actions-${sub._type}-${sub.id}" style="display:flex;gap:6px;margin-top:10px">
+              <button class="btn-approve" onclick="approveSub('${sub.id}','${sub._type}',${pts})">✓ Approve (+${pts} pts)</button>
+              <button class="btn-reject" onclick="showRejectForm('${sub.id}','${sub._type}')">✕ Reject</button>
+            </div>
+          </div>
+        </div>`
+      }).join('')
 
   return `
   <div class="admin-section">
     <div class="admin-label">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Pending approvals${pending.length>0?` (${pending.length})`:''}
+      Pending approvals${allPending.length>0?` (${allPending.length})`:''}
     </div>
     <div id="pending-list">${pendingRows}</div>
   </div>
@@ -453,7 +600,7 @@ function buildCoachHTML(pending) {
   <div class="admin-section">
     <div class="admin-label">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-      Post new challenge
+      Post new weekly challenge
     </div>
     <div class="card" style="margin-bottom:0">
       <div class="field"><label>Challenge title</label><input id="c-title" placeholder="e.g. Juggling Gauntlet" /></div>
@@ -505,6 +652,46 @@ function buildCoachHTML(pending) {
   </div>`
 }
 
+/* ── APPROVE / REJECT ── */
+async function approveSub(subId, type, points) {
+  const row=document.getElementById(`pr-${type}-${subId}`)
+  if (row) row.classList.add('fading')
+  try {
+    const table = type==='daily' ? 'daily_submissions' : 'submissions'
+    const { data: sub }=await sb.from(table).select('player_id').eq('id',subId).single()
+    await sb.from(table).update({status:'approved',points_awarded:points,reviewed_at:new Date().toISOString()}).eq('id',subId)
+    await sb.rpc('add_points',{player_id:sub.player_id,amount:points})
+    setTimeout(()=>{ if(row) row.remove() },350)
+  } catch(e) { if(row) row.classList.remove('fading'); console.error(e) }
+}
+function showRejectForm(subId, type) {
+  document.getElementById(`actions-${type}-${subId}`).innerHTML=`
+    <div class="reject-form">
+      <input id="reason-${subId}" placeholder="Reason for rejection (optional)" />
+      <div class="reject-actions">
+        <button class="btn-reject" onclick="confirmReject('${subId}','${type}')">Confirm reject</button>
+        <button class="cancel-link" onclick="cancelReject('${subId}','${type}')">Cancel</button>
+      </div>
+    </div>`
+}
+function cancelReject(subId, type) {
+  const pts = type==='daily' ? DAILY_POINTS : 50
+  document.getElementById(`actions-${type}-${subId}`).innerHTML=`
+    <button class="btn-approve" onclick="approveSub('${subId}','${type}',${pts})">✓ Approve</button>
+    <button class="btn-reject" onclick="showRejectForm('${subId}','${type}')">✕ Reject</button>`
+}
+async function confirmReject(subId, type) {
+  const reason=document.getElementById('reason-'+subId)?.value||''
+  const row=document.getElementById(`pr-${type}-${subId}`)
+  if (row) row.classList.add('fading')
+  try {
+    const table=type==='daily'?'daily_submissions':'submissions'
+    await sb.from(table).update({status:'rejected',rejection_reason:reason,reviewed_at:new Date().toISOString()}).eq('id',subId)
+    setTimeout(()=>{ if(row) row.remove() },350)
+  } catch(e) { if(row) row.classList.remove('fading'); console.error(e) }
+}
+
+/* ── COACH DEMO YT ── */
 function handleCoachYTInput(val) {
   const id=extractYouTubeId(val)
   const fb=document.getElementById('coach-yt-feedback')
@@ -529,52 +716,16 @@ function clearCoachYT() {
   document.getElementById('coach-yt-frame').src=''
 }
 
-async function approveSub(subId, points) {
-  const row=document.getElementById('pr-'+subId)
-  if (row) row.classList.add('fading')
-  try {
-    const { data: sub }=await sb.from('submissions').select('player_id').eq('id',subId).single()
-    await sb.from('submissions').update({status:'approved',points_awarded:points,reviewed_at:new Date().toISOString()}).eq('id',subId)
-    await sb.rpc('add_points',{player_id:sub.player_id,amount:points})
-    setTimeout(()=>{ if(row) row.remove() },350)
-  } catch(e) { if(row) row.classList.remove('fading'); console.error(e) }
-}
-
-function showRejectForm(subId) {
-  document.getElementById('actions-'+subId).innerHTML=`
-    <div class="reject-form">
-      <input id="reason-${subId}" placeholder="Reason for rejection (optional)" />
-      <div class="reject-actions">
-        <button class="btn-reject" onclick="confirmReject('${subId}')">Confirm reject</button>
-        <button class="cancel-link" onclick="cancelReject('${subId}')">Cancel</button>
-      </div>
-    </div>`
-}
-function cancelReject(subId) {
-  document.getElementById('actions-'+subId).innerHTML=`
-    <button class="btn-approve" onclick="approveSub('${subId}',50)">✓ Approve</button>
-    <button class="btn-reject" onclick="showRejectForm('${subId}')">✕ Reject</button>`
-}
-async function confirmReject(subId) {
-  const reason=document.getElementById('reason-'+subId)?.value||''
-  const row=document.getElementById('pr-'+subId)
-  if (row) row.classList.add('fading')
-  try {
-    await sb.from('submissions').update({status:'rejected',rejection_reason:reason,reviewed_at:new Date().toISOString()}).eq('id',subId)
-    setTimeout(()=>{ if(row) row.remove() },350)
-  } catch(e) { if(row) row.classList.remove('fading'); console.error(e) }
-}
-
+/* ── POST CHALLENGE ── */
 function getNextMondayNineAM() {
-  const now = new Date()
-  const day = now.getDay() // 0=Sun, 1=Mon...
-  const daysUntilMonday = day === 1 ? 7 : (8 - day) % 7 || 7
-  const nextMonday = new Date(now)
-  nextMonday.setDate(now.getDate() + daysUntilMonday)
-  nextMonday.setHours(14, 0, 0, 0) // 9am EST = 14:00 UTC
+  const now=new Date()
+  const day=now.getDay()
+  const daysUntilMonday=day===1?7:(8-day)%7||7
+  const nextMonday=new Date(now)
+  nextMonday.setDate(now.getDate()+daysUntilMonday)
+  nextMonday.setHours(14,0,0,0)
   return nextMonday.toISOString()
 }
-
 async function postChallenge(schedule) {
   const title=document.getElementById('c-title').value.trim()
   const desc=document.getElementById('c-desc').value.trim()
@@ -591,17 +742,14 @@ async function postChallenge(schedule) {
   try {
     const demoUrl=coachYouTubeId?`https://www.youtube.com/watch?v=${coachYouTubeId}`:null
     if (schedule) {
-      // Save as scheduled — pg_cron will activate it Monday 9am
-      const scheduledFor = getNextMondayNineAM()
       const { error: cErr }=await sb.from('challenges').insert({
         title, description:desc, demo_video_url:demoUrl,
         flat_points:flat, day1_bonus:d1, day2_bonus:d2, day3_bonus:d3,
-        is_active:false, scheduled_for:scheduledFor
+        is_active:false, scheduled_for:getNextMondayNineAM()
       })
       if (cErr) throw cErr
       showToast('schedule-toast')
     } else {
-      // Publish immediately
       await sb.from('challenges').update({is_active:false}).eq('is_active',true)
       const { data: c, error: cErr }=await sb.from('challenges').insert({
         title, description:desc, demo_video_url:demoUrl,
@@ -621,12 +769,12 @@ async function postChallenge(schedule) {
   } catch(e) {
     errEl.style.display='block'; errEl.textContent='Something went wrong. Try again.'
     postBtn.disabled=false; schedBtn.disabled=false
-    postBtn.textContent='🚀 Publish Now'
-    schedBtn.textContent='📅 Schedule Monday 9am'
+    postBtn.textContent='🚀 Publish Now'; schedBtn.textContent='📅 Schedule Monday 9am'
     console.error(e)
   }
 }
 
+/* ── ADD PLAYER ── */
 async function addPlayer() {
   const name=document.getElementById('p-name').value.trim()
   const user=document.getElementById('p-user').value.trim().toLowerCase()
@@ -649,6 +797,7 @@ async function addPlayer() {
   }
 }
 
+/* ── HELPERS ── */
 function calcBonus(c,submittedAt) {
   if (!c||!submittedAt) return 0
   const h=(new Date(submittedAt)-new Date(c.created_at))/3600000
