@@ -433,7 +433,7 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
       const bonus=isDaily?0:calcBonus(sub.challenges,sub.submitted_at)
       const pts=isDaily?DAILY_POINTS:(sub.challenges?.flat_points||50)+bonus
       const label=isDaily?'Daily — Wall Pass 1000':esc(sub.challenges?.title||'—')
-      return '<div class="pending-row" id="pr-'+sub._type+'-'+sub.id+'"><div class="flex-1"><div style="font-size:13px;font-weight:500">'+esc(sub.profiles?.display_name||'—')+badge+'</div><div style="font-size:11px;color:var(--muted);margin-top:1px">'+label+' &middot; '+fmt+(bonus>0?' &middot; <span style="color:var(--green)">+'+bonus+' position bonus</span>':'')+'</div>'+(ytId?'<div style="margin-top:8px;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--card-border);"><iframe src="'+ytEmbed(ytId)+'" width="100%" height="100%" style="border:none;display:block;" allowfullscreen loading="lazy"></iframe></div><a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer" style="margin-top:5px">Open in YouTube &#8599;</a>':'')+'<div id="actions-'+sub._type+'-'+sub.id+'" data-pts="'+pts+'" style="display:flex;gap:6px;margin-top:10px"><button class="btn-approve" onclick="approveSub(&quot;'+sub.id+'&quot;,&quot;'+sub._type+'&quot;,'+pts+')" >&#10003; Approve (+'+pts+' pts)</button><button class="btn-reject" onclick="showRejectForm(&quot;'+sub.id+'&quot;,&quot;'+sub._type+'&quot;)">&#10007; Reject</button></div></div></div>'
+      return '<div class="pending-row" id="pr-'+sub._type+'-'+sub.id+'"><div class="flex-1"><div style="font-size:13px;font-weight:500">'+esc(sub.profiles?.display_name||'—')+badge+'</div><div style="font-size:11px;color:var(--muted);margin-top:1px">'+label+' &middot; '+fmt+(bonus>0?' &middot; <span style="color:var(--green)">+'+bonus+' position bonus</span>':'')+'</div>'+(ytId?'<div style="margin-top:8px;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--card-border);"><iframe src="'+ytEmbed(ytId)+'" width="100%" height="100%" style="border:none;display:block;" allowfullscreen loading="lazy"></iframe></div><a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer" style="margin-top:5px">Open in YouTube &#8599;</a>':'')+'<div id="actions-'+sub._type+'-'+sub.id+'" style="display:flex;gap:6px;margin-top:10px"><button class="btn-approve" onclick="approveSub(&quot;'+sub.id+'&quot;,&quot;'+sub._type+'&quot;)">&#10003; Approve</button><button class="btn-reject" onclick="showRejectForm(&quot;'+sub.id+'&quot;,&quot;'+sub._type+'&quot;)">&#10007; Reject</button></div></div></div>'
     }).join('')
 
   const playerOptions=players.map(p=>'<option value="'+p.id+'">'+esc(p.display_name)+'</option>').join('')
@@ -468,23 +468,21 @@ async function checkStreakBonus(playerId){
   }
   return true
 }
-async function approveSub(subId,type,points){
+async function approveSub(subId,type){
   const row=document.getElementById('pr-'+type+'-'+subId)
+  const btn=row?row.querySelector('.btn-approve'):null
+  if(btn){btn.disabled=true;btn.textContent='Approving...'}
   if(row) row.classList.add('fading')
   try{
     const table=type==='daily'?'daily_submissions':'submissions'
     const{data:sub}=await sb.from(table).select('player_id,challenge_id').eq('id',subId).single()
-    // For weekly challenges, calculate position bonus based on approval order
-    let finalPoints=points
-    if(type==='weekly'||type!=='daily'){
+    let finalPoints=DAILY_POINTS
+    if(type!=='daily'){
+      // Count already-approved submissions for this challenge to get position
       const{data:approved}=await sb.from('submissions').select('id').eq('challenge_id',sub.challenge_id).eq('status','approved').order('reviewed_at',{ascending:true})
-      const pos=approved?approved.length:0 // position this will be (0-indexed)
+      const pos=approved?approved.length:0
       const{data:challenge}=await sb.from('challenges').select('flat_points,day1_bonus,day2_bonus,day3_bonus,day4_bonus').eq('id',sub.challenge_id).single()
-      const bonus=positionBonus(pos,challenge)
-      finalPoints=(challenge?.flat_points||50)+bonus
-      // Update the button to show correct points
-      const actEl=document.getElementById('actions-'+type+'-'+subId)
-      if(actEl) actEl.querySelector('.btn-approve').textContent='&#10003; Approve (+'+finalPoints+' pts)'
+      finalPoints=(challenge?.flat_points||50)+positionBonus(pos,challenge)
     }
     await sb.from(table).update({status:'approved',points_awarded:finalPoints,reviewed_at:new Date().toISOString()}).eq('id',subId)
     await sb.rpc('add_points',{player_id:sub.player_id,amount:finalPoints})
@@ -505,7 +503,7 @@ function showRejectForm(subId,type){
 function cancelReject(subId,type){
   const actEl=document.getElementById('actions-'+type+'-'+subId)
   const pts=actEl?parseInt(actEl.dataset.pts)||DAILY_POINTS:DAILY_POINTS
-  actEl.innerHTML='<button class="btn-approve" onclick="approveSub(&quot;'+subId+'&quot;,&quot;'+type+'&quot;,'+pts+')">&#10003; Approve (+'+pts+' pts)</button><button class="btn-reject" onclick="showRejectForm(&quot;'+subId+'&quot;,&quot;'+type+'&quot;)">&#10007; Reject</button>'
+  actEl.innerHTML='<button class="btn-approve" onclick="approveSub(&quot;'+subId+'&quot;,&quot;'+type+'&quot;)">&#10003; Approve</button><button class="btn-reject" onclick="showRejectForm(&quot;'+subId+'&quot;,&quot;'+type+'&quot;)">&#10007; Reject</button>'
 }
 async function confirmReject(subId,type){
   const reason=document.getElementById('reason-'+subId)?.value||''
