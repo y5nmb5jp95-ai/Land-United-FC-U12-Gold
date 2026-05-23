@@ -433,7 +433,7 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
       const bonus=isDaily?0:calcBonus(sub.challenges,sub.submitted_at)
       const pts=isDaily?DAILY_POINTS:(sub.challenges?.flat_points||50)+bonus
       const label=isDaily?'Daily — Wall Pass 1000':esc(sub.challenges?.title||'—')
-      return '<div class="pending-row" id="pr-'+sub._type+'-'+sub.id+'"><div class="flex-1"><div style="font-size:13px;font-weight:500">'+esc(sub.profiles?.display_name||'—')+badge+'</div><div style="font-size:11px;color:var(--muted);margin-top:1px">'+label+' &middot; '+fmt+(bonus>0?' &middot; <span style="color:var(--green)">+'+bonus+' position bonus</span>':'')+'</div>'+(ytId?'<div style="margin-top:8px;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--card-border);"><iframe src="'+ytEmbed(ytId)+'" width="100%" height="100%" style="border:none;display:block;" allowfullscreen loading="lazy"></iframe></div><a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer" style="margin-top:5px">Open in YouTube &#8599;</a>':'')+'<div id="actions-'+sub._type+'-'+sub.id+'" style="display:flex;gap:6px;margin-top:10px"><button class="btn-approve" onclick="approveSub(\''+sub.id+'\',\''+sub._type+'\','+pts+')">&#10003; Approve (+'+pts+' pts)</button><button class="btn-reject" onclick="showRejectForm(\''+sub.id+'\',\''+sub._type+'\')">&#10007; Reject</button></div></div></div>'
+      return '<div class="pending-row" id="pr-'+sub._type+'-'+sub.id+'"><div class="flex-1"><div style="font-size:13px;font-weight:500">'+esc(sub.profiles?.display_name||'—')+badge+'</div><div style="font-size:11px;color:var(--muted);margin-top:1px">'+label+' &middot; '+fmt+(bonus>0?' &middot; <span style="color:var(--green)">+'+bonus+' position bonus</span>':'')+'</div>'+(ytId?'<div style="margin-top:8px;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--card-border);"><iframe src="'+ytEmbed(ytId)+'" width="100%" height="100%" style="border:none;display:block;" allowfullscreen loading="lazy"></iframe></div><a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer" style="margin-top:5px">Open in YouTube &#8599;</a>':'')+'<div id="actions-'+sub._type+'-'+sub.id+'" data-pts="'+pts+'" style="display:flex;gap:6px;margin-top:10px"><button class="btn-approve" onclick="approveSub(&quot;'+sub.id+'&quot;,&quot;'+sub._type+'&quot;,'+pts+')" >&#10003; Approve (+'+pts+' pts)</button><button class="btn-reject" onclick="showRejectForm(&quot;'+sub.id+'&quot;,&quot;'+sub._type+'&quot;)">&#10007; Reject</button></div></div></div>'
     }).join('')
 
   const playerOptions=players.map(p=>'<option value="'+p.id+'">'+esc(p.display_name)+'</option>').join('')
@@ -500,11 +500,12 @@ async function approveSub(subId,type,points){
   }catch(e){ if(row) row.classList.remove('fading'); console.error(e) }
 }
 function showRejectForm(subId,type){
-  document.getElementById('actions-'+type+'-'+subId).innerHTML='<div class="reject-form"><input id="reason-'+subId+'" placeholder="Reason for rejection (optional)" /><div class="reject-actions"><button class="btn-reject" onclick="confirmReject(\''+subId+'\',\''+type+'\')">Confirm reject</button><button class="cancel-link" onclick="cancelReject(\''+subId+'\',\''+type+'\')">Cancel</button></div></div>'
+  document.getElementById('actions-'+type+'-'+subId).innerHTML='<div class="reject-form"><input id="reason-'+subId+'" placeholder="Reason for rejection (optional)" /><div class="reject-actions"><button class="btn-reject" onclick="confirmReject(&quot;'+subId+'&quot;,&quot;'+type+'&quot;)">Confirm reject</button><button class="cancel-link" onclick="cancelReject(&quot;'+subId+'&quot;,&quot;'+type+'&quot;)">Cancel</button></div></div>'
 }
 function cancelReject(subId,type){
-  const pts=type==='daily'?DAILY_POINTS:50
-  document.getElementById('actions-'+type+'-'+subId).innerHTML='<button class="btn-approve" onclick="approveSub(\''+subId+'\',\''+type+'\','+pts+')">&#10003; Approve</button><button class="btn-reject" onclick="showRejectForm(\''+subId+'\',\''+type+'\')">&#10007; Reject</button>'
+  const actEl=document.getElementById('actions-'+type+'-'+subId)
+  const pts=actEl?parseInt(actEl.dataset.pts)||DAILY_POINTS:DAILY_POINTS
+  actEl.innerHTML='<button class="btn-approve" onclick="approveSub(&quot;'+subId+'&quot;,&quot;'+type+'&quot;,'+pts+')">&#10003; Approve (+'+pts+' pts)</button><button class="btn-reject" onclick="showRejectForm(&quot;'+subId+'&quot;,&quot;'+type+'&quot;)">&#10007; Reject</button>'
 }
 async function confirmReject(subId,type){
   const reason=document.getElementById('reason-'+subId)?.value||''
