@@ -351,7 +351,7 @@ function renderDaily(el,todaySub,totalCompleted){
   +'<div class="card"><div class="demo-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Daily challenge</div>'
   +'<div class="section-title">Wall Pass 500</div>'
   +'<p class="section-desc">Complete 250 passes against a wall with your right foot and 250 with your left foot — 500 passes total, receiving the ball each time. Film the full session and upload to YouTube.</p>'
-  +'<div class="pill-row"><span class="pill blue">&#128197; Today &mdash; '+todayFmt+'</span><span class="pill">&#11088; '+DAILY_POINTS+' pts</span><span class="pill green">&#128293; Every '+STREAK_DAYS+' days = +'+STREAK_BONUS+' bonus</span></div>'
+  +'<div class="pill-row"><span class="pill blue">📅 Today &mdash; '+todayFmt+'</span><span class="pill">&#11088; '+DAILY_POINTS+' pts</span><span class="pill green">&#128293; Every '+STREAK_DAYS+' days = +'+STREAK_BONUS+' bonus</span></div>'
   +'<div id="daily-submission-area">'+renderDailyArea(todaySub)+'</div></div>'
   +'<p style="font-size:12px;color:var(--muted);text-align:center">Complete every day to maximise your total</p>'
 }
@@ -446,14 +446,14 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
   +'<div class="card" style="margin-bottom:0"><p style="font-size:12px;color:var(--muted);margin-bottom:12px">Add or remove points manually. Use a negative number to deduct (e.g. -10).</p>'
   +'<div class="field"><label>Player</label><select id="adj-player"><option value="">Select a player...</option>'+playerOptions+'</select></div>'
   +'<div class="pts-grid"><div class="field" style="margin-bottom:0"><label>Points (+add / -deduct)</label><input id="adj-pts" type="number" placeholder="e.g. 10 or -10" /></div><div class="field" style="margin-bottom:0"><label>Reason (optional)</label><input id="adj-reason" type="text" placeholder="e.g. Bonus for effort" /></div></div>'
-  +'<button class="btn-primary" id="adj-btn" onclick="adjustPoints()" style="margin-top:14px">&#9889; Apply Points</button><div id="adj-toast" style="display:none" class="toast">&#10003; Points updated!</div><div id="adj-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div></div></div>'
+  +'<button class="btn-primary" id="adj-btn" onclick="adjustPoints()" style="margin-top:14px">⚡ Apply Points</button><div id="adj-toast" style="display:none" class="toast">&#10003; Points updated!</div><div id="adj-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div></div></div>'
 
   +'<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Post new weekly challenge</div>'
   +'<div class="card" style="margin-bottom:0"><div class="field"><label>Challenge title</label><input id="c-title" placeholder="e.g. Juggling Gauntlet" /></div><div class="field"><label>Description</label><textarea id="c-desc" rows="3" placeholder="Describe the challenge clearly..."></textarea></div>'
   +'<div class="field"><label>Your demo video — paste the YouTube link</label><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="coach-yt-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleCoachYTInput(this.value)" /></div><div id="coach-yt-feedback"></div><div id="coach-yt-preview" style="display:none;margin-top:8px"><div class="coach-yt-wrap"><iframe id="coach-yt-frame" src="" allowfullscreen loading="lazy"></iframe></div><button class="cancel-link" style="margin-top:4px" onclick="clearCoachYT()">&#10005; Remove</button></div></div>'
   +'<div class="admin-label" style="margin-top:4px">Point values</div><div class="pts-grid" style="margin-bottom:12px"><div class="field" style="margin-bottom:0"><label>Completion pts</label><input id="c-flat" type="number" value="50" min="0" /></div><div class="field" style="margin-bottom:0"><label>1st to submit bonus</label><input id="c-d1" type="number" value="20" min="0" /></div><div class="field" style="margin-bottom:0"><label>2nd bonus</label><input id="c-d2" type="number" value="15" min="0" /></div><div class="field" style="margin-bottom:0"><label>3rd bonus</label><input id="c-d3" type="number" value="10" min="0" /></div></div><div class="pts-grid" style="margin-bottom:12px"><div class="field" style="margin-bottom:0"><label>4th bonus</label><input id="c-d4" type="number" value="5" min="0" /></div></div>'
-  +'<div style="display:flex;gap:10px;margin-top:12px"><button class="btn-primary" id="post-btn" onclick="postChallenge(false)" style="margin-top:0">&#128640; Publish Now</button><button class="btn-primary" id="schedule-btn" onclick="postChallenge(true)" style="margin-top:0;background:var(--navy-mid);border:1px solid var(--peach);color:var(--white);font-size:16px">&#128197; Schedule Monday 9am</button></div>'
-  +'<div id="post-toast" style="display:none" class="toast">&#10003; Challenge is live!</div><div id="schedule-toast" style="display:none" class="toast">&#128197; Scheduled for Monday 9am!</div><div id="post-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div></div></div>'
+  +'<div style="display:flex;gap:10px;margin-top:12px"><button class="btn-primary" id="post-btn" onclick="postChallenge(false)" style="margin-top:0">🚀 Publish Now</button><button class="btn-primary" id="schedule-btn" onclick="postChallenge(true)" style="margin-top:0;background:var(--navy-mid);border:1px solid var(--peach);color:var(--white);font-size:16px">📅 Schedule Monday 9am</button></div>'
+  +'<div id="post-toast" style="display:none" class="toast">&#10003; Challenge is live!</div><div id="schedule-toast" style="display:none" class="toast">📅 Scheduled for Monday 9am!</div><div id="post-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div></div></div>'
 
   +'<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Add player to squad</div>'
   +'<div class="card" style="margin-bottom:0"><div class="field"><label>Display name</label><input id="p-name" placeholder="e.g. Marcus Rodriguez" /></div><div class="pts-grid"><div class="field" style="margin-bottom:0"><label>Username</label><input id="p-user" placeholder="marcus_r" autocapitalize="none" /></div><div class="field" style="margin-bottom:0"><label>PIN (4 digits)</label><input id="p-pin" type="password" inputmode="numeric" maxlength="4" placeholder="&#8226;&#8226;&#8226;&#8226;" /></div></div>'
@@ -463,7 +463,7 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
   +'<div class="card" style="margin-bottom:0;border-color:var(--danger-border)">'
   +'<p style="font-size:13px;color:var(--muted);margin-bottom:12px">This will permanently delete <strong style="color:var(--white)">all submissions, challenges, points and streaks</strong> for every player. Use this before going live. This cannot be undone.</p>'
   +'<div class="field"><label style="color:var(--danger)">Type RESET to confirm</label><input id="reset-confirm-input" type="text" placeholder="RESET" autocomplete="off" style="border-color:var(--danger-border)" /></div>'
-  +'<button class="btn-primary" onclick="resetAllData()" style="background:var(--danger);color:var(--white);margin-top:4px">&#128465; Reset Everything</button>'
+  +'<button class="btn-primary" onclick="resetAllData()" style="background:var(--danger);color:var(--white);margin-top:4px">🗑️ Reset Everything</button>'
   +'<div id="reset-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div>'
   +'<div id="reset-toast" style="display:none" class="toast">&#10003; All data reset. Ready to go live!</div>'
   +'</div></div>'
@@ -546,10 +546,10 @@ async function adjustPoints(){
     document.getElementById('adj-reason').value=''
     document.getElementById('adj-player').value=''
     showToast('adj-toast')
-    btn.disabled=false;btn.textContent='&#9889; Apply Points'
+    btn.disabled=false;btn.textContent='⚡ Apply Points'
   }catch(e){
     errEl.style.display='block';errEl.textContent='Something went wrong. Try again.'
-    btn.disabled=false;btn.textContent='&#9889; Apply Points';console.error(e)
+    btn.disabled=false;btn.textContent='⚡ Apply Points';console.error(e)
   }
 }
 
@@ -586,8 +586,8 @@ async function postChallenge(schedule){
       if(cErr) throw cErr; activeChallenge=c; showToast('post-toast')
     }
     document.getElementById('c-title').value='';document.getElementById('c-desc').value='';clearCoachYT()
-    postBtn.disabled=false;schedBtn.disabled=false;postBtn.textContent='&#128640; Publish Now';schedBtn.textContent='&#128197; Schedule Monday 9am'
-  }catch(e){errEl.style.display='block';errEl.textContent='Something went wrong. Try again.';postBtn.disabled=false;schedBtn.disabled=false;postBtn.textContent='&#128640; Publish Now';schedBtn.textContent='&#128197; Schedule Monday 9am';console.error(e)}
+    postBtn.disabled=false;schedBtn.disabled=false;postBtn.textContent='🚀 Publish Now';schedBtn.textContent='📅 Schedule Monday 9am'
+  }catch(e){errEl.style.display='block';errEl.textContent='Something went wrong. Try again.';postBtn.disabled=false;schedBtn.disabled=false;postBtn.textContent='🚀 Publish Now';schedBtn.textContent='📅 Schedule Monday 9am';console.error(e)}
 }
 
 /* ADD PLAYER */
@@ -707,7 +707,7 @@ function renderRules(){
         <p style="font-size:12px;color:var(--muted);margin-top:6px">Complete 5 days in a row and earn an automatic bonus on top of your daily points. Keep the streak going!</p>
         <div class="rules-divider"></div>
         <div style="background:var(--peach-pale);border:1px solid rgba(232,168,124,.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.6">
-          &#128197; If you complete every day for a week: <strong style="color:var(--white)">70+ pts</strong> from daily alone
+          📅 If you complete every day for a week: <strong style="color:var(--white)">70+ pts</strong> from daily alone
         </div>
       </div>
 
@@ -717,7 +717,7 @@ function renderRules(){
           Tips to maximise your points
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:16px;flex-shrink:0">&#9889;</span><span style="font-size:13px;color:var(--muted)">Submit your weekly challenge as soon as possible — the earlier you submit, the bigger the bonus.</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:16px;flex-shrink:0">⚡</span><span style="font-size:13px;color:var(--muted)">Submit your weekly challenge as soon as possible — the earlier you submit, the bigger the bonus.</span></div>
           <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:16px;flex-shrink:0">&#128293;</span><span style="font-size:13px;color:var(--muted)">Do the daily challenge every single day. A 5-day streak earns you an automatic bonus.</span></div>
           <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:16px;flex-shrink:0">&#127916;</span><span style="font-size:13px;color:var(--muted)">Upload your video to YouTube as unlisted, then paste the link. Coach reviews and approves it.</span></div>
           <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:16px;flex-shrink:0">&#127942;</span><span style="font-size:13px;color:var(--muted)">Check the leaderboard to see where you stand — and tap any player to see their full stats.</span></div>
@@ -748,12 +748,12 @@ async function resetAllData(){
     // Reset all player points and streaks
     await sb.from('profiles').update({total_points:0,current_streak:0}).eq('is_coach',false).eq('is_viewer',false).eq('is_alumni',false)
     input.value=''
-    btn.disabled=false; btn.textContent='&#128465; Reset Everything'
+    btn.disabled=false; btn.textContent='🗑️ Reset Everything'
     showToast('reset-toast')
   }catch(e){
     errEl.style.display='block'
     errEl.textContent='Something went wrong: '+e.message
-    btn.disabled=false; btn.textContent='&#128465; Reset Everything'
+    btn.disabled=false; btn.textContent='🗑️ Reset Everything'
     console.error(e)
   }
 }
