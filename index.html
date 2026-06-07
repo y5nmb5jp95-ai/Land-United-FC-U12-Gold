@@ -191,7 +191,7 @@ a.watch-yt:hover{text-decoration:underline;}
 <script>
 const { createClient } = supabase
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON)
-let currentSession=null,currentProfile=null,activeChallenge=null,playerYouTubeId=null,dailyYouTubeId=null,coachYouTubeId=null,playerLookup={}
+let currentSession=null,currentProfile=null,activeChallenge=null,playerYouTubeId=null,dailyYouTubeId=null,coachYouTubeId=null,playerLookup={},dailyDemoUrl=null
 
 document.getElementById('login-crest-img').src=CREST_URL
 document.getElementById('header-crest-img').src=CREST_URL
@@ -220,6 +220,7 @@ async function bootApp(session) {
   } else {
     if(isCoach) document.getElementById('tab-coach-btn').style.display=''
     if(isAlumni) document.getElementById('user-label').textContent=(profile?.display_name||'Alumni')+' (Alumni) · sign out'
+    loadDailyDemoUrl()
     loadChallenge()
   }
 }
@@ -315,6 +316,14 @@ async function submitYouTube(){
   }catch(e){errEl.style.display='block';errEl.textContent='Something went wrong. Please try again.';btn.disabled=false;btn.textContent='Submit for Coach Review';console.error(e)}
 }
 
+/* DAILY DEMO URL */
+async function loadDailyDemoUrl(){
+  try{
+    const{data}=await sb.from('settings').select('value').eq('key','daily_demo_url').single()
+    dailyDemoUrl=data?.value||null
+  }catch(e){ dailyDemoUrl=null }
+}
+
 /* DAILY CHALLENGE */
 /* VIEWER CHALLENGE VIEW */
 async function loadViewerChallenge(){
@@ -347,8 +356,9 @@ async function loadDaily(){
 function renderDaily(el,todaySub,totalCompleted){
   const todayFmt=new Date().toLocaleDateString('en-GB',{weekday:'long',month:'long',day:'numeric'})
   const nextStreak=STREAK_DAYS-(totalCompleted%STREAK_DAYS)
+  const demoSection=dailyDemoUrl?'<div class="demo-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>Technique demo — watch before you attempt</div><div class="yt-wrap"><iframe src="'+ytEmbed(extractYouTubeId(dailyDemoUrl))+'" allowfullscreen loading="lazy"></iframe></div>':''
   el.innerHTML=(totalCompleted>0?'<div class="daily-banner"><div class="daily-streak-num">'+totalCompleted+'</div><div><div style="font-size:14px;font-weight:500">Days completed</div><div style="font-size:12px;color:var(--muted);margin-top:2px">'+nextStreak+' day'+(nextStreak===1?'':'s')+' until next streak bonus &#128293;</div></div></div>':'')
-  +'<div class="card"><div class="demo-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Daily challenge</div>'
+  +'<div class="card">'+demoSection+'<div class="demo-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Daily challenge</div>'
   +'<div class="section-title">Wall Pass 500</div>'
   +'<p class="section-desc">Complete 250 passes against a wall with your right foot and 250 with your left foot — 500 passes total, receiving the ball each time. Film the full session and upload to YouTube.</p>'
   +'<div class="pill-row"><span class="pill blue">📅 Today &mdash; '+todayFmt+'</span><span class="pill">&#11088; '+DAILY_POINTS+' pts</span><span class="pill green">&#128293; Every '+STREAK_DAYS+' days = +'+STREAK_BONUS+' bonus</span></div>'
@@ -451,6 +461,7 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
   +'<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Post new weekly challenge</div>'
   +'<div class="card" style="margin-bottom:0"><div class="field"><label>Challenge title</label><input id="c-title" placeholder="e.g. Juggling Gauntlet" /></div><div class="field"><label>Description</label><textarea id="c-desc" rows="3" placeholder="Describe the challenge clearly..."></textarea></div>'
   +'<div class="field"><label>Your demo video — paste the YouTube link</label><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="coach-yt-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleCoachYTInput(this.value)" /></div><div id="coach-yt-feedback"></div><div id="coach-yt-preview" style="display:none;margin-top:8px"><div class="coach-yt-wrap"><iframe id="coach-yt-frame" src="" allowfullscreen loading="lazy"></iframe></div><button class="cancel-link" style="margin-top:4px" onclick="clearCoachYT()">&#10005; Remove</button></div></div>'
+  +'<div class="field"><label>Daily challenge demo video (permanent — players see this every day)</label><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="daily-demo-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleDailyDemoInput(this.value)" /></div><div id="daily-demo-feedback"></div><div id="daily-demo-preview" style="display:none;margin-top:8px"><div class="coach-yt-wrap"><iframe id="daily-demo-frame" src="" allowfullscreen loading="lazy"></iframe></div></div><button class="btn-secondary" onclick="saveDailyDemo()" style="margin-top:8px">Save demo video</button><div id="daily-demo-toast" style="display:none" class="toast">&#10003; Daily demo video saved!</div></div>'
   +'<div class="admin-label" style="margin-top:4px">Point values</div><div class="pts-grid" style="margin-bottom:12px"><div class="field" style="margin-bottom:0"><label>Completion pts</label><input id="c-flat" type="number" value="50" min="0" /></div><div class="field" style="margin-bottom:0"><label>1st to submit bonus</label><input id="c-d1" type="number" value="20" min="0" /></div><div class="field" style="margin-bottom:0"><label>2nd bonus</label><input id="c-d2" type="number" value="15" min="0" /></div><div class="field" style="margin-bottom:0"><label>3rd bonus</label><input id="c-d3" type="number" value="10" min="0" /></div></div><div class="pts-grid" style="margin-bottom:12px"><div class="field" style="margin-bottom:0"><label>4th bonus</label><input id="c-d4" type="number" value="5" min="0" /></div></div>'
   +'<div style="display:flex;gap:10px;margin-top:12px"><button class="btn-primary" id="post-btn" onclick="postChallenge(false)" style="margin-top:0">🚀 Publish Now</button><button class="btn-primary" id="schedule-btn" onclick="postChallenge(true)" style="margin-top:0;background:var(--navy-mid);border:1px solid var(--peach);color:var(--white);font-size:16px">📅 Schedule Monday 9am</button></div>'
   +'<div id="post-toast" style="display:none" class="toast">&#10003; Challenge is live!</div><div id="schedule-toast" style="display:none" class="toast">📅 Scheduled for Monday 9am!</div><div id="post-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div></div></div>'
@@ -741,6 +752,33 @@ function renderRules(){
       </div>
     </div>
   `
+}
+
+/* DAILY DEMO VIDEO */
+function handleDailyDemoInput(val){
+  const id=extractYouTubeId(val)
+  const fb=document.getElementById('daily-demo-feedback')
+  const preview=document.getElementById('daily-demo-preview')
+  const frame=document.getElementById('daily-demo-frame')
+  if(!val.trim()){fb.innerHTML='';preview.style.display='none';return}
+  if(id){
+    fb.innerHTML='<div class="yt-valid" style="margin-top:5px">&#10003; Link recognised</div>'
+    frame.src=ytEmbed(id); preview.style.display='block'
+  } else {
+    fb.innerHTML='<div class="yt-invalid" style="margin-top:5px">Not a valid YouTube link.</div>'
+    preview.style.display='none'
+  }
+}
+async function saveDailyDemo(){
+  const val=document.getElementById('daily-demo-input').value.trim()
+  const id=extractYouTubeId(val)
+  if(!id){ alert('Please enter a valid YouTube link first.'); return }
+  const url='https://www.youtube.com/watch?v='+id
+  try{
+    await sb.from('settings').upsert({key:'daily_demo_url',value:url})
+    dailyDemoUrl=url
+    showToast('daily-demo-toast')
+  }catch(e){ alert('Could not save. Try again.'); console.error(e) }
 }
 
 /* RESET */
