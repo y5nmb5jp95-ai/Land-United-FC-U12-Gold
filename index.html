@@ -485,32 +485,48 @@ async function approveSub(subId,type){
   if(btn){btn.disabled=true;btn.textContent='Approving...'}
   if(row) row.classList.add('fading')
   try{
-    const table=type==='daily'?'daily_submissions':'submissions'
-    const{data:sub}=await sb.from(table).select('player_id,challenge_id').eq('id',subId).single()
     let finalPoints=DAILY_POINTS
-    if(type!=='daily'){
-      // Count already-approved submissions for this challenge to get position
+    let playerId=null
+
+    if(type==='daily'){
+      // Daily submission — just needs player_id, no challenge_id
+      const{data:sub,error}=await sb.from('daily_submissions').select('player_id').eq('id',subId).single()
+      if(error) throw error
+      playerId=sub.player_id
+      await sb.from('daily_submissions').update({status:'approved',points_awarded:finalPoints,reviewed_at:new Date().toISOString()}).eq('id',subId)
+    } else {
+      // Weekly submission — needs challenge_id for position bonus
+      const{data:sub,error}=await sb.from('submissions').select('player_id,challenge_id').eq('id',subId).single()
+      if(error) throw error
+      playerId=sub.player_id
       const{data:approved}=await sb.from('submissions').select('id').eq('challenge_id',sub.challenge_id).eq('status','approved').order('reviewed_at',{ascending:true})
       const pos=approved?approved.length:0
       const{data:challenge}=await sb.from('challenges').select('flat_points,day1_bonus,day2_bonus,day3_bonus,day4_bonus').eq('id',sub.challenge_id).single()
       finalPoints=(challenge?.flat_points||50)+positionBonus(pos,challenge)
+      await sb.from('submissions').update({status:'approved',points_awarded:finalPoints,reviewed_at:new Date().toISOString()}).eq('id',subId)
     }
-    await sb.from(table).update({status:'approved',points_awarded:finalPoints,reviewed_at:new Date().toISOString()}).eq('id',subId)
-    // Only add points for non-alumni players
-    const{data:playerProfile}=await sb.from('profiles').select('is_alumni').eq('id',sub.player_id).single()
+
+    // Add points (skip for alumni)
+    const{data:playerProfile}=await sb.from('profiles').select('is_alumni').eq('id',playerId).single()
     if(!playerProfile?.is_alumni){
-      await sb.rpc('add_points',{player_id:sub.player_id,amount:finalPoints})
+      await sb.rpc('add_points',{player_id:playerId,amount:finalPoints})
     }
+
+    // Check streak bonus for daily
     if(type==='daily'){
-      const hasStreak=await checkStreakBonus(sub.player_id)
+      const hasStreak=await checkStreakBonus(playerId)
       if(hasStreak){
-        await sb.rpc('add_points',{player_id:sub.player_id,amount:STREAK_BONUS})
+        await sb.rpc('add_points',{player_id:playerId,amount:STREAK_BONUS})
         const t=document.getElementById('streak-toast')
         if(t){t.style.display='flex';setTimeout(()=>t.style.display='none',4000)}
       }
     }
     setTimeout(()=>{ if(row) row.remove() },350)
-  }catch(e){ if(row) row.classList.remove('fading'); console.error(e) }
+  }catch(e){
+    if(row){row.classList.remove('fading');if(btn){btn.disabled=false;btn.textContent='✓ Approve'}}
+    console.error('approveSub error:',e)
+    alert('Approval failed: '+e.message)
+  }
 }
 function showRejectForm(subId,type){
   document.getElementById('actions-'+type+'-'+subId).innerHTML='<div class="reject-form"><input id="reason-'+subId+'" placeholder="Reason for rejection (optional)" /><div class="reject-actions"><button class="btn-reject" onclick="confirmReject(&quot;'+subId+'&quot;,&quot;'+type+'&quot;)">Confirm reject</button><button class="cancel-link" onclick="cancelReject(&quot;'+subId+'&quot;,&quot;'+type+'&quot;)">Cancel</button></div></div>'
