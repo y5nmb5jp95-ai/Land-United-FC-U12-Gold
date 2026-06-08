@@ -608,9 +608,12 @@ async function postChallenge(schedule){
       const{error:cErr}=await sb.from('challenges').insert({title,description:desc,demo_video_url:demoUrl,flat_points:flat,day1_bonus:d1,day2_bonus:d2,day3_bonus:d3,day4_bonus:d4,is_active:false,scheduled_for:getNextMondayNineAM()})
       if(cErr) throw cErr; showToast('schedule-toast')
     }else{
-      await sb.from('challenges').update({is_active:false}).eq('is_active',true)
+      // Insert new challenge first, THEN deactivate old one — prevents blank state if insert fails
       const{data:c,error:cErr}=await sb.from('challenges').insert({title,description:desc,demo_video_url:demoUrl,flat_points:flat,day1_bonus:d1,day2_bonus:d2,day3_bonus:d3,day4_bonus:d4,is_active:true,scheduled_for:null}).select().single()
-      if(cErr) throw cErr; activeChallenge=c; showToast('post-toast')
+      if(cErr) throw cErr
+      // Now safely deactivate any other active challenges
+      await sb.from('challenges').update({is_active:false}).eq('is_active',true).neq('id',c.id)
+      activeChallenge=c; showToast('post-toast')
     }
     document.getElementById('c-title').value='';document.getElementById('c-desc').value='';clearCoachYT()
     postBtn.disabled=false;schedBtn.disabled=false;postBtn.textContent='🚀 Publish Now';schedBtn.textContent='📅 Schedule Monday 9am'
