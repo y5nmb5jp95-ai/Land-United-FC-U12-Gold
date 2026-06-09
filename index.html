@@ -347,7 +347,8 @@ async function loadDaily(){
   const el=document.getElementById('daily-content')
   el.innerHTML='<div class="loading-center"><div class="spinner"></div></div>'
   try{
-    const today=new Date().toISOString().slice(0,10)
+    const now=new Date()
+    const today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')
     const{data:todaySub}=await sb.from('daily_submissions').select('*').eq('player_id',currentSession.user.id).eq('submitted_date',today).maybeSingle()
     const{count}=await sb.from('daily_submissions').select('*',{count:'exact',head:true}).eq('player_id',currentSession.user.id).eq('status','approved')
     renderDaily(el,todaySub,count||0)
@@ -386,7 +387,7 @@ async function submitDaily(){
   const btn=document.getElementById('daily-submit-btn'),errEl=document.getElementById('daily-submit-error')
   btn.disabled=true;btn.textContent='Submitting…';errEl.style.display='none'
   try{
-    const{data:sub,error}=await sb.from('daily_submissions').insert({player_id:currentSession.user.id,video_url:'https://www.youtube.com/watch?v='+dailyYouTubeId,status:'pending',submitted_at:new Date().toISOString(),submitted_date:new Date().toISOString().slice(0,10)}).select().single()
+    const{data:sub,error}=await sb.from('daily_submissions').insert({player_id:currentSession.user.id,video_url:'https://www.youtube.com/watch?v='+dailyYouTubeId,status:'pending',submitted_at:new Date().toISOString(),submitted_date:(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})()}).select().single()
     if(error) throw error
     dailyYouTubeId=null
     document.getElementById('daily-submission-area').innerHTML=renderDailyArea(sub)
