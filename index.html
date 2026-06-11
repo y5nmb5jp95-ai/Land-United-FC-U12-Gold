@@ -301,7 +301,13 @@ function renderSubmissionArea(sub,c){
   const ytLink=ytId?'<a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer">Watch on YouTube &#8599;</a>':''
   if(sub.status==='pending') return '<div class="status-box pending"><div class="flex-1"><div style="font-weight:500;font-size:14px">&#9203; Submitted — awaiting coach review</div><div style="font-size:12px;color:var(--muted);margin-top:3px">'+fmt+(bonus>0?' &middot; <span style="color:var(--green)">Position bonus +'+bonus+' pts pending</span>':'')+'</div>'+ytLink+'</div></div>'
   if(sub.status==='approved') return '<div class="status-box approved"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--green)">&#10003; Approved! +'+sub.points_awarded+' pts added</div>'+ytLink+'</div></div>'
-  return '<div class="status-box rejected"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--danger)">&#10007; Not approved this time</div>'+(sub.rejection_reason?'<div style="font-size:12px;color:var(--muted);margin-top:3px">Coach note: '+esc(sub.rejection_reason)+'</div>':'')+'<button onclick="resubmitWeekly()" style="margin-top:10px;padding:8px 14px;background:var(--peach);color:var(--navy-dark);font-family:var(--font-d);font-size:16px;letter-spacing:1px;border:none;border-radius:var(--radius-sm);cursor:pointer">Resubmit Video</button></div></div>'
+  const resubmitBtn='<button id="resubmit-weekly-btn" style="margin-top:10px;padding:8px 14px;background:var(--peach);color:var(--navy-dark);font-family:var(--font-d);font-size:16px;letter-spacing:1px;border:none;border-radius:var(--radius-sm);cursor:pointer">Resubmit Video</button>'
+  const html='<div class="status-box rejected"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--danger)">&#10007; Not approved this time</div>'+(sub.rejection_reason?'<div style="font-size:12px;color:var(--muted);margin-top:3px">Coach note: '+esc(sub.rejection_reason)+'</div>':'')+resubmitBtn+'</div></div>'
+  setTimeout(()=>{
+    const btn=document.getElementById('resubmit-weekly-btn')
+    if(btn) btn.addEventListener('click', resubmitWeekly)
+  },0)
+  return html
 }
 function handleYTInput(val){
   const id=extractYouTubeId(val)
@@ -379,7 +385,14 @@ function renderDailyArea(sub){
   const ytLink=ytId?'<a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer">Watch on YouTube &#8599;</a>':''
   if(sub.status==='pending') return '<div class="status-box pending"><div class="flex-1"><div style="font-weight:500;font-size:14px">&#9203; Submitted at '+fmt+' — awaiting approval</div><div style="font-size:12px;color:var(--muted);margin-top:3px">+'+DAILY_POINTS+' pts added once approved</div>'+ytLink+'</div></div>'
   if(sub.status==='approved') return '<div class="status-box approved"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--green)">&#10003; Approved! +'+DAILY_POINTS+' pts added</div><div style="font-size:12px;color:var(--muted);margin-top:3px">Come back tomorrow to keep going!</div></div></div>'
-  return '<div class="status-box rejected"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--danger)">&#10007; Not approved today</div>'+(sub.rejection_reason?'<div style="font-size:12px;color:var(--muted);margin-top:3px">Coach note: '+esc(sub.rejection_reason)+'</div>':'')+'<div style="font-size:12px;color:var(--muted);margin-top:5px">Fix the issue and resubmit today.</div><button onclick="resubmitDaily(\''+sub.id+'\')" style="margin-top:10px;padding:8px 14px;background:var(--peach);color:var(--navy-dark);font-family:var(--font-d);font-size:16px;letter-spacing:1px;border:none;border-radius:var(--radius-sm);cursor:pointer">Resubmit Today</button></div></div>'
+  const dailyResubmitBtn='<button id="resubmit-daily-btn" style="margin-top:10px;padding:8px 14px;background:var(--peach);color:var(--navy-dark);font-family:var(--font-d);font-size:16px;letter-spacing:1px;border:none;border-radius:var(--radius-sm);cursor:pointer">Resubmit Today</button>'
+  const dailyHtml='<div class="status-box rejected"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--danger)">&#10007; Not approved today</div>'+(sub.rejection_reason?'<div style="font-size:12px;color:var(--muted);margin-top:3px">Coach note: '+esc(sub.rejection_reason)+'</div>':'')+'<div style="font-size:12px;color:var(--muted);margin-top:5px">Fix the issue and resubmit today.</div>'+dailyResubmitBtn+'</div></div>'
+  const capturedId=sub.id
+  setTimeout(()=>{
+    const btn=document.getElementById('resubmit-daily-btn')
+    if(btn) btn.addEventListener('click', ()=>resubmitDaily(capturedId))
+  },0)
+  return dailyHtml
 }
 function handleDailyYTInput(val){
   const id=extractYouTubeId(val)
