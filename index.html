@@ -360,6 +360,19 @@ async function loadDaily(){
   el.innerHTML='<div class="loading-center"><div class="spinner"></div></div>'
   try{
     const now=new Date()
+    const dayOfWeek=now.getDay() // 0=Sun, 6=Sat
+    const isWeekend=dayOfWeek===0||dayOfWeek===6
+
+    // Check manual toggle from settings
+    const{data:setting}=await sb.from('settings').select('value').eq('key','daily_enabled').maybeSingle()
+    const manuallyDisabled=setting?.value==='false'
+
+    if(isWeekend||manuallyDisabled){
+      const reason=manuallyDisabled&&!isWeekend?'Daily challenge is currently paused by your coach.':'It's the weekend — rest up and come back Monday! &#128564;'
+      el.innerHTML='<div class="card" style="text-align:center;padding:28px 18px"><div style="font-size:32px;margin-bottom:12px">&#128564;</div><div style="font-family:var(--font-d);font-size:22px;margin-bottom:8px">Rest Day</div><p style="font-size:13px;color:var(--muted);line-height:1.6">'+reason+'</p></div>'
+      return
+    }
+
     const today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')
     const{data:todaySub}=await sb.from('daily_submissions').select('*').eq('player_id',currentSession.user.id).eq('submitted_date',today).maybeSingle()
     const{count}=await sb.from('daily_submissions').select('*',{count:'exact',head:true}).eq('player_id',currentSession.user.id).eq('status','approved')
@@ -447,6 +460,7 @@ async function loadCoachPanel(){
       sb.from('profiles').select('id,display_name').eq('is_coach',false).eq('is_viewer',false).eq('is_alumni',false).order('display_name',{ascending:true})
     ])
     el.innerHTML=buildCoachHTML(weeklyPending||[],dailyPending||[],players||[])
+    loadDailyToggleState()
   }catch(e){el.innerHTML='<p class="text-muted">Could not load coach panel.</p>';console.error(e)}
 }
 
@@ -477,6 +491,10 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
   +'<div class="field"><label>Player</label><select id="adj-player"><option value="">Select a player...</option>'+playerOptions+'</select></div>'
   +'<div class="pts-grid"><div class="field" style="margin-bottom:0"><label>Points (+add / -deduct)</label><input id="adj-pts" type="number" placeholder="e.g. 10 or -10" /></div><div class="field" style="margin-bottom:0"><label>Reason (optional)</label><input id="adj-reason" type="text" placeholder="e.g. Bonus for effort" /></div></div>'
   +'<button class="btn-primary" id="adj-btn" onclick="adjustPoints()" style="margin-top:14px">⚡ Apply Points</button><div id="adj-toast" style="display:none" class="toast">&#10003; Points updated!</div><div id="adj-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div></div></div>'
+
+  +'<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Daily challenge</div>'
+  +'<div class="card" style="margin-bottom:0"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><div><div style="font-size:14px;font-weight:500">Daily submissions</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Automatically off on weekends. Use this to pause mid-week.</div></div><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><span id="daily-toggle-label" style="font-size:12px;color:var(--muted)">Loading...</span><div id="daily-toggle" onclick="toggleDaily()" style="width:44px;height:24px;border-radius:12px;background:var(--card-border);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0"><div id="daily-toggle-thumb" style="width:20px;height:20px;border-radius:50%;background:var(--white);position:absolute;top:2px;left:2px;transition:left .2s"></div></div></label></div></div></div>'
+  +'<div id="daily-toggle-toast" style="display:none" class="toast">&#10003; Daily challenge updated!</div></div>'
 
   +'<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Post new weekly challenge</div>'
   +'<div class="card" style="margin-bottom:0"><div class="field"><label>Challenge title</label><input id="c-title" placeholder="e.g. Juggling Gauntlet" /></div><div class="field"><label>Description</label><textarea id="c-desc" rows="3" placeholder="Describe the challenge clearly..."></textarea></div>'
@@ -802,6 +820,36 @@ async function saveDailyDemo(){
     dailyDemoUrl=url
     showToast('daily-demo-toast')
   }catch(e){ alert('Could not save. Try again.'); console.error(e) }
+}
+
+/* DAILY TOGGLE */
+async function loadDailyToggleState(){
+  try{
+    const{data}=await sb.from('settings').select('value').eq('key','daily_enabled').maybeSingle()
+    const enabled=!data||data.value!=='false'
+    updateToggleUI(enabled)
+  }catch(e){console.error(e)}
+}
+function updateToggleUI(enabled){
+  const toggle=document.getElementById('daily-toggle')
+  const thumb=document.getElementById('daily-toggle-thumb')
+  const label=document.getElementById('daily-toggle-label')
+  if(!toggle) return
+  toggle.style.background=enabled?'var(--green)':'var(--card-border)'
+  thumb.style.left=enabled?'22px':'2px'
+  label.textContent=enabled?'On':'Off'
+  label.style.color=enabled?'var(--green)':'var(--muted)'
+}
+async function toggleDaily(){
+  const label=document.getElementById('daily-toggle-label')
+  if(!label) return
+  const currentlyOn=label.textContent==='On'
+  const newVal=currentlyOn?'false':'true'
+  try{
+    await sb.from('settings').upsert({key:'daily_enabled',value:newVal})
+    updateToggleUI(!currentlyOn)
+    showToast('daily-toggle-toast')
+  }catch(e){console.error(e);alert('Could not update. Try again.')}
 }
 
 /* RESET */
