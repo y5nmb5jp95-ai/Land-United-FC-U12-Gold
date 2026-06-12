@@ -519,12 +519,20 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
 }
 
 /* APPROVE / REJECT */
+function nextWeekday(date){
+  // Returns the previous weekday date (skipping weekends going backwards)
+  const d=new Date(date)
+  d.setDate(d.getDate()-1)
+  while(d.getDay()===0||d.getDay()===6) d.setDate(d.getDate()-1)
+  return d.toISOString().slice(0,10)
+}
 async function checkStreakBonus(playerId){
   const{data}=await sb.from('daily_submissions').select('submitted_date').eq('player_id',playerId).eq('status','approved').order('submitted_date',{ascending:false}).limit(STREAK_DAYS)
   if(!data||data.length<STREAK_DAYS) return false
   for(let i=0;i<data.length-1;i++){
-    const diff=(new Date(data[i].submitted_date)-new Date(data[i+1].submitted_date))/(1000*60*60*24)
-    if(diff!==1) return false
+    // Each date should be the previous weekday of the one before it
+    const expected=nextWeekday(data[i].submitted_date)
+    if(data[i+1].submitted_date!==expected) return false
   }
   return true
 }
