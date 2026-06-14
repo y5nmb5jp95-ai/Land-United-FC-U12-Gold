@@ -274,14 +274,35 @@ async function loadChallenge(){
   const el=document.getElementById('challenge-content')
   el.innerHTML='<div class="loading-center"><div class="spinner"></div></div>'
   try{
+    // Get active challenge
     const{data:c}=await sb.from('challenges').select('*').eq('is_active',true).limit(1).maybeSingle()
     activeChallenge=c
     if(!c){el.innerHTML='<p class="text-muted" style="text-align:center;padding-top:30px">No active challenge yet.<br>Check back Monday morning!</p>';return}
+    // Get player's submission for active challenge
     const{data:sub}=await sb.from('submissions').select('*').eq('challenge_id',c.id).eq('player_id',currentSession.user.id).maybeSingle()
-    renderChallenge(el,c,sub)
+    // Get all previous inactive challenges
+    const{data:prevChallenges}=await sb.from('challenges').select('*').eq('is_active',false).order('created_at',{ascending:false})
+    // For each previous challenge, check if player has submitted
+    const prevWithSubs=await Promise.all((prevChallenges||[]).map(async pc=>{
+      const{data:psub}=await sb.from('submissions').select('*').eq('challenge_id',pc.id).eq('player_id',currentSession.user.id).maybeSingle()
+      return{challenge:pc,submission:psub}
+    }))
+    // Only show challenges player hasn't submitted yet
+    const unsubmitted=prevWithSubs.filter(p=>!p.submission)
+    renderChallenge(el,c,sub,unsubmitted)
   }catch(e){el.innerHTML='<p class="text-muted">Could not load challenge.</p>';console.error(e)}
 }
-function renderChallenge(el,c,sub){
+function calcWeeksElapsed(challenge){
+  const cws=new Date(challenge.created_at)
+  const cday=cws.getDay(); cws.setDate(cws.getDate()-(cday===0?6:cday-1)); cws.setHours(0,0,0,0)
+  return Math.round((getWeekStart()-cws)/(7*24*60*60*1000))
+}
+function calcDecayedPoints(challenge){
+  const weeks=calcWeeksElapsed(challenge)
+  const base=challenge.flat_points||50
+  return weeks===0?base:Math.max(1,Math.round(base/Math.pow(2,weeks)))
+}
+function renderChallenge(el,c,sub,prevUncompleted){
   el.innerHTML='<div class="card"><div class="section-title">'+esc(c.title)+'</div><p class="section-desc">'+esc(c.description)+'</p>'
   +(c.demo_video_url?'<div class="demo-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>Coach demo</div><div class="yt-wrap"><iframe src="'+ytEmbed(extractYouTubeId(c.demo_video_url))+'" allowfullscreen loading="lazy"></iframe></div>':'')
   +'<div class="pill-row"><span class="pill">&#11088; '+c.flat_points+' pts</span>'
@@ -292,7 +313,78 @@ function renderChallenge(el,c,sub){
   +'</div><div id="submission-area">'+renderSubmissionArea(sub,c)+'</div></div>'
   +'<p style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:10px">Week 1: 50 pts + bonuses &nbsp;&#8226;&nbsp; Week 2: 25 pts &nbsp;&#8226;&nbsp; Week 3: 12 pts (no bonuses after week 1)</p>'
   +'<div class="countdown-box" id="countdown-wrap"><div class="countdown-label">Next challenge drops in</div><div class="countdown-timer" id="countdown-timer"><div class="countdown-unit"><div class="countdown-num" id="cd-d">--</div><div class="countdown-lbl">Days</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-h">--</div><div class="countdown-lbl">Hours</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-m">--</div><div class="countdown-lbl">Mins</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-s">--</div><div class="countdown-lbl">Secs</div></div></div></div>'
+  // Render previous uncompleted challenges below
+  if(prevUncompleted&&prevUncompleted.length>0){
+    let prevHTML='<div style="margin-top:6px">'
+    prevHTML+='<div class="admin-label" style="margin-bottom:10px">&#9201; Previous open challenges</div>'
+    prevUncompleted.forEach(({challenge:pc})=>{
+      const weeks=calcWeeksElapsed(pc)
+      const decayedPts=calcDecayedPoints(pc)
+      const weekLabel='Week '+(weeks+1)
+      prevHTML+='<div class="card" style="border-color:var(--danger-border);margin-bottom:12px">'
+      prevHTML+='<div style="background:var(--danger-bg);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--danger)">&#9201; <strong>'+esc(pc.title)+'</strong> — submitting in '+weekLabel+', worth <strong>'+decayedPts+' pts only</strong>, no position bonus</div>'
+      prevHTML+='<div class="section-title" style="font-size:18px">'+esc(pc.title)+'</div>'
+      prevHTML+='<p class="section-desc">'+esc(pc.description)+'</p>'
+      if(pc.demo_video_url){
+        prevHTML+='<div class="demo-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>Coach demo</div>'
+        prevHTML+='<div class="yt-wrap"><iframe src="'+ytEmbed(extractYouTubeId(pc.demo_video_url))+'" allowfullscreen loading="lazy"></iframe></div>'
+      }
+      prevHTML+=renderPrevSubmissionArea(pc,decayedPts)
+      prevHTML+='</div>'
+    })
+    prevHTML+='</div>'
+    el.innerHTML+=prevHTML
+  }
   startCountdown()
+}
+function renderPrevSubmissionArea(pc,pts){
+  const inputId='prev-yt-'+pc.id
+  const feedbackId='prev-feedback-'+pc.id
+  const previewId='prev-preview-'+pc.id
+  const frameId='prev-frame-'+pc.id
+  const btnId='prev-btn-'+pc.id
+  const errId='prev-err-'+pc.id
+  setTimeout(()=>{
+    const input=document.getElementById(inputId)
+    const btn=document.getElementById(btnId)
+    if(input) input.addEventListener('input',function(){
+      const id=extractYouTubeId(this.value)
+      const fb=document.getElementById(feedbackId)
+      const preview=document.getElementById(previewId)
+      const frame=document.getElementById(frameId)
+      if(!this.value.trim()){fb.innerHTML='';preview.style.display='none';btn.disabled=true;return}
+      if(id){fb.innerHTML='<div class="yt-valid">&#10003; Link recognised</div>';frame.src=ytEmbed(id);preview.style.display='block';btn.disabled=false;btn.dataset.ytid=id}
+      else{fb.innerHTML='<div class="yt-invalid">Not a valid YouTube link.</div>';preview.style.display='none';btn.disabled=true}
+    })
+    if(btn) btn.addEventListener('click',()=>submitPrevChallenge(pc.id,pts,btn,errId))
+  },0)
+  return '<div style="margin-bottom:4px;font-size:13px;font-weight:500">Submit your YouTube link</div>'
+    +'<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload your attempt to YouTube, then paste the link below.</p>'
+    +'<div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="'+inputId+'" type="url" placeholder="https://youtube.com/watch?v=..." /></div>'
+    +'<div id="'+feedbackId+'"></div>'
+    +'<div id="'+previewId+'" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="'+frameId+'" src="" allowfullscreen loading="lazy"></iframe></div></div>'
+    +'<button class="btn-primary" id="'+btnId+'" disabled>Submit for Coach Review</button>'
+    +'<div id="'+errId+'" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
+}
+async function submitPrevChallenge(challengeId,points,btn,errId){
+  const ytId=btn.dataset.ytid
+  if(!ytId) return
+  btn.disabled=true; btn.textContent='Submitting...'
+  const errEl=document.getElementById(errId)
+  try{
+    const{error}=await sb.from('submissions').insert({
+      challenge_id:challengeId, player_id:currentSession.user.id,
+      video_url:'https://www.youtube.com/watch?v='+ytId,
+      status:'pending', submitted_at:new Date().toISOString()
+    })
+    if(error) throw error
+    // Reload to update the UI
+    loadChallenge()
+  }catch(e){
+    if(errEl){errEl.style.display='block';errEl.textContent='Something went wrong. Please try again.'}
+    btn.disabled=false; btn.textContent='Submit for Coach Review'
+    console.error(e)
+  }
 }
 function renderSubmissionArea(sub,c){
   if(!sub){
