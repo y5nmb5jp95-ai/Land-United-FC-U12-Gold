@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lu-u12-gold-v1';
+const CACHE_NAME = 'lu-u12-gold-v2';
 const ASSETS = [
   '.',
   './index.html',
@@ -11,21 +11,22 @@ const ASSETS = [
 
 // Install — cache core assets
 self.addEventListener('install', e => {
+  self.skipWaiting(); // Force immediate activation
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
 });
 
-// Activate — clean up old caches
+// Activate — delete ALL old caches and take control immediately
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    ).then(() => self.clients.claim()) // Take control of all open tabs
   );
 });
 
-// Fetch — network first for Supabase API calls, cache first for assets
+// Fetch — network first for HTML (always get latest), cache for everything else
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
@@ -35,7 +36,21 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Cache first for everything else
+  // Network first for the HTML file — ensures updates always reach users
+  if (e.request.url.includes('index.html') || e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Cache first for everything else (fonts, icons, scripts)
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
