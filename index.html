@@ -290,11 +290,20 @@ function renderChallenge(el,c,sub){
   +'<span class="pill green">&#129353; 3rd: +'+c.day3_bonus+' pts</span>'
   +(c.day4_bonus>0?'<span class="pill green">4th: +'+c.day4_bonus+' pts</span>':'')
   +'</div><div id="submission-area">'+renderSubmissionArea(sub,c)+'</div></div>'
+  +'<p style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:10px">Week 1: 50 pts + bonuses &nbsp;&#8226;&nbsp; Week 2: 25 pts &nbsp;&#8226;&nbsp; Week 3: 12 pts (no bonuses after week 1)</p>'
   +'<div class="countdown-box" id="countdown-wrap"><div class="countdown-label">Next challenge drops in</div><div class="countdown-timer" id="countdown-timer"><div class="countdown-unit"><div class="countdown-num" id="cd-d">--</div><div class="countdown-lbl">Days</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-h">--</div><div class="countdown-lbl">Hours</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-m">--</div><div class="countdown-lbl">Mins</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-s">--</div><div class="countdown-lbl">Secs</div></div></div></div>'
   startCountdown()
 }
 function renderSubmissionArea(sub,c){
-  if(!sub) return '<div style="margin-bottom:4px;font-size:13px;font-weight:500">Submit your YouTube link</div><p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload your attempt to YouTube (can be unlisted), then paste the link below.</p><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="yt-link-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleYTInput(this.value)" /></div><div id="yt-feedback"></div><div id="yt-preview" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="yt-preview-frame" src="" allowfullscreen loading="lazy"></iframe></div></div><button class="btn-primary" id="submit-btn" onclick="submitYouTube()" disabled>Submit for Coach Review</button><div id="submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
+  if(!sub){
+    const cws=new Date(c.created_at); const cday=cws.getDay(); cws.setDate(cws.getDate()-(cday===0?6:cday-1)); cws.setHours(0,0,0,0)
+    const weeksElapsed=Math.round((getWeekStart()-cws)/(7*24*60*60*1000))
+    const base=c.flat_points||50
+    const weekPts=weeksElapsed===0?base:Math.max(1,Math.round(base/Math.pow(2,weeksElapsed)))
+    const weekLabel='Week '+(weeksElapsed+1)
+    const ptsNote=weeksElapsed===0?'<div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:12px;font-size:13px;color:var(--green)">&#127941; Submitting in <strong>'+weekLabel+'</strong> — worth <strong>'+weekPts+' pts</strong> + position bonus if in top 4</div>':'<div style="background:var(--danger-bg);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:12px;font-size:13px;color:var(--danger)">&#9201; Submitting in <strong>'+weekLabel+'</strong> — worth <strong>'+weekPts+' pts only</strong>, no position bonus</div>'
+    return ptsNote+'<div style="margin-bottom:4px;font-size:13px;font-weight:500">Submit your YouTube link</div><p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload your attempt to YouTube (can be unlisted), then paste the link below.</p><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="yt-link-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleYTInput(this.value)" /></div><div id="yt-feedback"></div><div id="yt-preview" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="yt-preview-frame" src="" allowfullscreen loading="lazy"></iframe></div></div><button class="btn-primary" id="submit-btn" onclick="submitYouTube()" disabled>Submit for Coach Review</button><div id="submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
+  }
   const bonus=calcBonus(c,sub.submitted_at)
   const fmt=new Date(sub.submitted_at).toLocaleDateString('en-GB',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
   const ytId=extractYouTubeId(sub.video_url)
@@ -360,38 +369,47 @@ async function loadDaily(){
   el.innerHTML='<div class="loading-center"><div class="spinner"></div></div>'
   try{
     const now=new Date()
-    const dayOfWeek=now.getDay() // 0=Sun, 6=Sat
-    const isWeekend=dayOfWeek===0||dayOfWeek===6
 
     // Check manual toggle from settings
     const{data:setting}=await sb.from('settings').select('value').eq('key','daily_enabled').maybeSingle()
     const manuallyDisabled=setting?.value==='false'
 
-    if(isWeekend||manuallyDisabled){
-      const reason=manuallyDisabled&&!isWeekend?'Daily challenge is currently paused by your coach.':'It's the weekend — rest up and come back Monday! &#128564;'
-      el.innerHTML='<div class="card" style="text-align:center;padding:28px 18px"><div style="font-size:32px;margin-bottom:12px">&#128564;</div><div style="font-family:var(--font-d);font-size:22px;margin-bottom:8px">Rest Day</div><p style="font-size:13px;color:var(--muted);line-height:1.6">'+reason+'</p></div>'
+    if(manuallyDisabled){
+      el.innerHTML='<div class="card" style="text-align:center;padding:28px 18px"><div style="font-size:32px;margin-bottom:12px">&#9899;</div><div style="font-family:var(--font-d);font-size:22px;margin-bottom:8px">Paused</div><p style="font-size:13px;color:var(--muted);line-height:1.6">Daily challenge is currently paused by your coach.</p></div>'
       return
     }
 
     const today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')
     const{data:todaySub}=await sb.from('daily_submissions').select('*').eq('player_id',currentSession.user.id).eq('submitted_date',today).maybeSingle()
     const{count}=await sb.from('daily_submissions').select('*',{count:'exact',head:true}).eq('player_id',currentSession.user.id).eq('status','approved')
-    renderDaily(el,todaySub,count||0)
+    // Count approved submissions this week (Mon-Sun)
+    const weekStart=getWeekStart().toISOString().slice(0,10)
+    const{count:weekCount}=await sb.from('daily_submissions').select('*',{count:'exact',head:true}).eq('player_id',currentSession.user.id).eq('status','approved').gte('submitted_date',weekStart)
+    renderDaily(el,todaySub,count||0,weekCount||0)
   }catch(e){el.innerHTML='<p class="text-muted">Could not load daily challenge.</p>';console.error(e)}
 }
-function renderDaily(el,todaySub,totalCompleted){
-  const todayFmt=new Date().toLocaleDateString('en-GB',{weekday:'long',month:'long',day:'numeric'})
-  const nextStreak=STREAK_DAYS-(totalCompleted%STREAK_DAYS)
-  const demoSection=dailyDemoUrl?'<div class="demo-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>Technique demo — watch before you attempt</div><div class="yt-wrap"><iframe src="'+ytEmbed(extractYouTubeId(dailyDemoUrl))+'" allowfullscreen loading="lazy"></iframe></div>':''
-  el.innerHTML=(totalCompleted>0?'<div class="daily-banner"><div class="daily-streak-num">'+totalCompleted+'</div><div><div style="font-size:14px;font-weight:500">Days completed</div><div style="font-size:12px;color:var(--muted);margin-top:2px">'+nextStreak+' day'+(nextStreak===1?'':'s')+' until next streak bonus &#128293;</div></div></div>':'')
-  +'<div class="card">'+demoSection+'<div class="demo-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Daily challenge</div>'
-  +'<div class="section-title">Wall Pass 500</div>'
-  +'<p class="section-desc">Complete 250 passes against a wall with your right foot and 250 with your left foot — 500 passes total, receiving the ball each time. Film the full session and upload to YouTube.</p>'
-  +'<div class="pill-row"><span class="pill blue">📅 Today &mdash; '+todayFmt+'</span><span class="pill">&#11088; '+DAILY_POINTS+' pts</span><span class="pill green">&#128293; Every '+STREAK_DAYS+' days = +'+STREAK_BONUS+' bonus</span></div>'
-  +'<div id="daily-submission-area">'+renderDailyArea(todaySub)+'</div></div>'
-  +'<p style="font-size:12px;color:var(--muted);text-align:center">Complete every day to maximise your total</p>'
+function getWeekStart(){
+  const now=new Date()
+  const day=now.getDay()
+  const mon=new Date(now)
+  mon.setDate(now.getDate()-(day===0?6:day-1))
+  mon.setHours(0,0,0,0)
+  return mon
 }
-function renderDailyArea(sub){
+function renderDaily(el,todaySub,totalCompleted,weeklyCount){
+  const todayFmt=new Date().toLocaleDateString('en-GB',{weekday:'long',month:'long',day:'numeric'})
+  const demoSection=dailyDemoUrl?'<div class="demo-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>Technique demo — watch before you attempt</div><div class="yt-wrap"><iframe src="'+ytEmbed(extractYouTubeId(dailyDemoUrl))+'" allowfullscreen loading="lazy"></iframe></div>':''
+  const weeklyProgress=weeklyCount>=STREAK_DAYS?'<div class="daily-banner" style="background:linear-gradient(135deg,rgba(110,207,138,0.15),rgba(110,207,138,0.05));border-color:var(--green-border)"><div class="daily-streak-num" style="color:var(--green)">&#128293;</div><div><div style="font-size:14px;font-weight:500">Streak bonus earned!</div><div style="font-size:12px;color:var(--muted);margin-top:2px">You completed 5 sessions this week. +'+STREAK_BONUS+' pts awarded!</div></div></div>':'<div class="daily-banner"><div class="daily-streak-num">'+weeklyCount+'/5</div><div><div style="font-size:14px;font-weight:500">Sessions this week</div><div style="font-size:12px;color:var(--muted);margin-top:2px">'+(STREAK_DAYS-weeklyCount)+' more to earn the +'+STREAK_BONUS+' bonus this week</div></div></div>'
+  el.innerHTML=weeklyProgress
+  +'<div class="card">'+demoSection+'<div class="demo-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Daily challenge</div>'
+  +'<div class="section-title">Wall Pass 300</div>'
+  +'<p class="section-desc">Complete 150 passes against a wall with your right foot and 150 with your left foot — 300 passes total, receiving the ball each time. Film the full session and upload to YouTube.</p>'
+  +'<div class="pill-row"><span class="pill blue">📅 Today &mdash; '+todayFmt+'</span><span class="pill">&#11088; '+DAILY_POINTS+' pts</span><span class="pill green">🔥 5 sessions/week = +'+STREAK_BONUS+' bonus</span></div>'
+  +'<div id="daily-submission-area">'+renderDailyArea(todaySub,weeklyCount)+'</div></div>'
+  +'<p style="font-size:12px;color:var(--muted);text-align:center">Complete 5 sessions any day Mon-Sun to earn the weekly bonus</p>'
+}
+function renderDailyArea(sub,weeklyCount){
+  if(!sub&&weeklyCount>=STREAK_DAYS) return '<div class="status-box approved"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--green)">&#127942; Week complete! You\'ve hit 5 sessions this week.</div><div style="font-size:12px;color:var(--muted);margin-top:3px">Come back next Monday for a fresh week!</div></div></div>'
   if(!sub) return '<div style="margin-bottom:4px;font-size:13px;font-weight:500">Submit today\'s YouTube link</div><p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload today\'s session to YouTube (can be unlisted), then paste the link below.</p><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="daily-yt-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleDailyYTInput(this.value)" /></div><div id="daily-yt-feedback"></div><div id="daily-yt-preview" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="daily-yt-frame" src="" allowfullscreen loading="lazy"></iframe></div></div><button class="btn-primary" id="daily-submit-btn" onclick="submitDaily()" disabled>Submit Today\'s Session</button><div id="daily-submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
   const fmt=new Date(sub.submitted_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
   const ytId=extractYouTubeId(sub.video_url)
@@ -422,7 +440,7 @@ async function submitDaily(){
     const{data:sub,error}=await sb.from('daily_submissions').insert({player_id:currentSession.user.id,video_url:'https://www.youtube.com/watch?v='+dailyYouTubeId,status:'pending',submitted_at:new Date().toISOString(),submitted_date:(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})()}).select().single()
     if(error) throw error
     dailyYouTubeId=null
-    document.getElementById('daily-submission-area').innerHTML=renderDailyArea(sub)
+    document.getElementById('daily-submission-area').innerHTML=renderDailyArea(sub,0)
   }catch(e){
     if(e.code==='23505'){errEl.style.display='block';errEl.textContent='You have already submitted today. Come back tomorrow!'}
     else{errEl.style.display='block';errEl.textContent='Something went wrong. Please try again.'}
@@ -478,7 +496,7 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
       const ytId=extractYouTubeId(sub.video_url)
       const bonus=isDaily?0:calcBonus(sub.challenges,sub.submitted_at)
       const pts=isDaily?DAILY_POINTS:(sub.challenges?.flat_points||50)+bonus
-      const label=isDaily?'Daily — Wall Pass 500':esc(sub.challenges?.title||'—')
+      const label=isDaily?'Daily — Wall Pass 300':esc(sub.challenges?.title||'—')
       return '<div class="pending-row" id="pr-'+sub._type+'-'+sub.id+'"><div class="flex-1"><div style="font-size:13px;font-weight:500">'+esc(sub.profiles?.display_name||'—')+badge+'</div><div style="font-size:11px;color:var(--muted);margin-top:1px">'+label+' &middot; '+fmt+(bonus>0?' &middot; <span style="color:var(--green)">+'+bonus+' position bonus</span>':'')+'</div>'+(ytId?'<div style="margin-top:8px;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--card-border);"><iframe src="'+ytEmbed(ytId)+'" width="100%" height="100%" style="border:none;display:block;" allowfullscreen loading="lazy"></iframe></div><a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer" style="margin-top:5px">Open in YouTube &#8599;</a>':'')+'<div id="actions-'+sub._type+'-'+sub.id+'" style="display:flex;gap:6px;margin-top:10px"><button class="btn-approve" onclick="approveSub(&quot;'+sub.id+'&quot;,&quot;'+sub._type+'&quot;)">&#10003; Approve</button><button class="btn-reject" onclick="showRejectForm(&quot;'+sub.id+'&quot;,&quot;'+sub._type+'&quot;)">&#10007; Reject</button></div></div></div>'
     }).join('')
 
@@ -519,22 +537,11 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
 }
 
 /* APPROVE / REJECT */
-function nextWeekday(date){
-  // Returns the previous weekday date (skipping weekends going backwards)
-  const d=new Date(date)
-  d.setDate(d.getDate()-1)
-  while(d.getDay()===0||d.getDay()===6) d.setDate(d.getDate()-1)
-  return d.toISOString().slice(0,10)
-}
 async function checkStreakBonus(playerId){
-  const{data}=await sb.from('daily_submissions').select('submitted_date').eq('player_id',playerId).eq('status','approved').order('submitted_date',{ascending:false}).limit(STREAK_DAYS)
-  if(!data||data.length<STREAK_DAYS) return false
-  for(let i=0;i<data.length-1;i++){
-    // Each date should be the previous weekday of the one before it
-    const expected=nextWeekday(data[i].submitted_date)
-    if(data[i+1].submitted_date!==expected) return false
-  }
-  return true
+  // Check if player has completed 5 approved sessions this week (Mon-Sun)
+  const weekStart=getWeekStart().toISOString().slice(0,10)
+  const{count}=await sb.from('daily_submissions').select('*',{count:'exact',head:true}).eq('player_id',playerId).eq('status','approved').gte('submitted_date',weekStart)
+  return (count||0)===STREAK_DAYS // exactly 5 triggers the bonus (not 6,7 etc to avoid double awarding)
 }
 async function approveSub(subId,type){
   const row=document.getElementById('pr-'+type+'-'+subId)
@@ -558,8 +565,23 @@ async function approveSub(subId,type){
       playerId=sub.player_id
       const{data:approved}=await sb.from('submissions').select('id').eq('challenge_id',sub.challenge_id).eq('status','approved').order('reviewed_at',{ascending:true})
       const pos=approved?approved.length:0
-      const{data:challenge}=await sb.from('challenges').select('flat_points,day1_bonus,day2_bonus,day3_bonus,day4_bonus').eq('id',sub.challenge_id).single()
-      finalPoints=(challenge?.flat_points||50)+positionBonus(pos,challenge)
+      const{data:challenge}=await sb.from('challenges').select('flat_points,day1_bonus,day2_bonus,day3_bonus,day4_bonus,created_at').eq('id',sub.challenge_id).single()
+      // Calculate weeks elapsed since challenge was created (week 0 = same week)
+      const weekMs=7*24*60*60*1000
+      const challengeWeekStart=new Date(challenge.created_at)
+      const day=challengeWeekStart.getDay()
+      challengeWeekStart.setDate(challengeWeekStart.getDate()-(day===0?6:day-1))
+      challengeWeekStart.setHours(0,0,0,0)
+      const submissionWeekStart=getWeekStart()
+      const weeksElapsed=Math.round((submissionWeekStart-challengeWeekStart)/weekMs)
+      if(weeksElapsed===0){
+        // First week — full points + position bonus
+        finalPoints=(challenge?.flat_points||50)+positionBonus(pos,challenge)
+      } else {
+        // Subsequent weeks — halved each week, no position bonus
+        const base=challenge?.flat_points||50
+        finalPoints=Math.max(1,Math.round(base/Math.pow(2,weeksElapsed)))
+      }
       await sb.from('submissions').update({status:'approved',points_awarded:finalPoints,reviewed_at:new Date().toISOString()}).eq('id',subId)
     }
 
@@ -736,7 +758,7 @@ async function showStats(playerId,displayName,avatarColor){
 
     const weekRows=(weekSubs||[]).map(s=>'<div class="history-row"><div style="font-size:13px">'+esc(s.challenges?.title||'Challenge')+'</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--muted)">'+new Date(s.submitted_at).toLocaleDateString('en-GB',{month:'short',day:'numeric'})+'</span>'+(s.status==='approved'?'<span style="font-size:12px;color:var(--green)">+'+s.points_awarded+'</span>':s.status==='pending'?'<span style="font-size:11px;color:var(--peach)">pending</span>':'<span style="font-size:11px;color:var(--danger)">rejected</span>')+'</div></div>').join('')
 
-    const dailyRows=(dailySubs||[]).map(s=>'<div class="history-row"><div style="font-size:13px">Wall Pass 500</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--muted)">'+s.submitted_date+'</span>'+(s.status==='approved'?'<span style="font-size:12px;color:var(--green)">+'+s.points_awarded+'</span>':s.status==='pending'?'<span style="font-size:11px;color:var(--peach)">pending</span>':'<span style="font-size:11px;color:var(--danger)">rejected</span>')+'</div></div>').join('')
+    const dailyRows=(dailySubs||[]).map(s=>'<div class="history-row"><div style="font-size:13px">Wall Pass 300</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--muted)">'+s.submitted_date+'</span>'+(s.status==='approved'?'<span style="font-size:12px;color:var(--green)">+'+s.points_awarded+'</span>':s.status==='pending'?'<span style="font-size:11px;color:var(--peach)">pending</span>':'<span style="font-size:11px;color:var(--danger)">rejected</span>')+'</div></div>').join('')
 
     el.innerHTML='<button class="stats-back" onclick="switchTab(&quot;leaderboard&quot;)">&#8592; Back to leaderboard</button>'
     +'<div class="stats-header"><div class="stats-avatar" style="background:'+col+'33;color:'+col+';border:2px solid '+col+'55">'+ini+'</div><div><div style="font-size:18px;font-weight:500">'+esc(displayName)+'</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Player stats</div></div></div>'
@@ -767,7 +789,7 @@ function renderRules(){
         <div class="rules-row"><span class="rules-label">4th player to submit</span><span class="rules-pts" style="color:var(--green)">+5 pts</span></div>
         <div class="rules-divider"></div>
         <div style="background:var(--peach-pale);border:1px solid rgba(232,168,124,.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.6">
-          &#128274; Max possible per week: <strong style="color:var(--white)">70 pts</strong> (50 base + 20 for 1st place)
+          &#128274; Max in week 1: <strong style="color:var(--white)">70 pts</strong> (50 base + 20 for 1st) &nbsp;&#8226;&nbsp; Week 2: 25 pts &nbsp;&#8226;&nbsp; Week 3: 12 pts
         </div>
       </div>
 
@@ -776,15 +798,16 @@ function renderRules(){
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           Daily Challenge
         </div>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">250 passes with your right foot + 250 with your left foot against a wall — 500 passes total. Film the full session and submit every day.</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">150 passes with your right foot + 150 with your left foot against a wall — 300 passes total. Film the full session and submit any day of the week.</p>
         <div class="rules-row"><span class="rules-label">Complete a daily session</span><span class="rules-pts">10 pts</span></div>
         <div class="rules-divider"></div>
         <div class="rules-row"><span class="rules-label">&#128293; 5-day streak bonus</span><span class="rules-pts" style="color:var(--green)">+10 pts</span></div>
-        <p style="font-size:12px;color:var(--muted);margin-top:6px">Complete 5 days in a row and earn an automatic bonus on top of your daily points. Keep the streak going!</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:6px">Complete any 5 sessions in a week (Monday to Sunday) and earn an automatic bonus. No need for consecutive days!</p>
         <div class="rules-divider"></div>
         <div style="background:var(--peach-pale);border:1px solid rgba(232,168,124,.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.6">
-          📅 If you complete every day for a week: <strong style="color:var(--white)">70+ pts</strong> from daily alone
+          📅 Complete 5 sessions in a week: <strong style="color:var(--white)">60 pts</strong> (5 x 10 pts + 10 bonus)
         </div>
+        <div style="background:rgba(224,107,90,0.1);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;font-size:12px;color:var(--muted);line-height:1.6">&#9201; <strong style="color:var(--white)">Challenges stay open</strong> past week 1 but points halve each week. No position bonuses after week 1.</div>
       </div>
 
       <div class="card">
