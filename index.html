@@ -280,8 +280,8 @@ async function loadChallenge(){
     if(!c){el.innerHTML='<p class="text-muted" style="text-align:center;padding-top:30px">No active challenge yet.<br>Check back Monday morning!</p>';return}
     // Get player's submission for active challenge
     const{data:sub}=await sb.from('submissions').select('*').eq('challenge_id',c.id).eq('player_id',currentSession.user.id).maybeSingle()
-    // Get all previous inactive challenges
-    const{data:prevChallenges}=await sb.from('challenges').select('*').eq('is_active',false).order('created_at',{ascending:false})
+    // Get previous challenges created BEFORE the active challenge
+    const{data:prevChallenges}=await sb.from('challenges').select('*').eq('is_active',false).lt('created_at',c.created_at).order('created_at',{ascending:false})
     // For each previous challenge, check if player has submitted
     const prevWithSubs=await Promise.all((prevChallenges||[]).map(async pc=>{
       const{data:psub}=await sb.from('submissions').select('*').eq('challenge_id',pc.id).eq('player_id',currentSession.user.id).maybeSingle()
