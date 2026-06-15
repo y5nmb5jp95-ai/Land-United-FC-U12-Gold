@@ -277,7 +277,12 @@ async function loadChallenge(){
     // Get active challenge
     const{data:c}=await sb.from('challenges').select('*').eq('is_active',true).limit(1).maybeSingle()
     activeChallenge=c
-    if(!c){el.innerHTML='<p class="text-muted" style="text-align:center;padding-top:30px">No active challenge yet.<br>Check back Monday morning!</p>';return}
+    if(!c){
+      el.innerHTML='<p class="text-muted" style="text-align:center;padding-top:20px;margin-bottom:16px">No active challenge yet.</p>'
+        +'<div class="countdown-box" id="countdown-wrap"><div class="countdown-label">Next challenge drops in</div><div class="countdown-timer" id="countdown-timer"><div class="countdown-unit"><div class="countdown-num" id="cd-d">--</div><div class="countdown-lbl">Days</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-h">--</div><div class="countdown-lbl">Hours</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-m">--</div><div class="countdown-lbl">Mins</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-s">--</div><div class="countdown-lbl">Secs</div></div></div></div>'
+      startCountdown()
+      return
+    }
     // Get player's submission for active challenge
     const{data:sub}=await sb.from('submissions').select('*').eq('challenge_id',c.id).eq('player_id',currentSession.user.id).maybeSingle()
     // Get previous challenges created BEFORE the active challenge
@@ -312,7 +317,6 @@ function renderChallenge(el,c,sub,prevUncompleted){
   +(c.day4_bonus>0?'<span class="pill green">4th: +'+c.day4_bonus+' pts</span>':'')
   +'</div><div id="submission-area">'+renderSubmissionArea(sub,c)+'</div></div>'
   +'<p style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:10px">Week 1: 50 pts + bonuses &nbsp;&#8226;&nbsp; Week 2: 25 pts &nbsp;&#8226;&nbsp; Week 3: 12 pts (no bonuses after week 1)</p>'
-  +'<div class="countdown-box" id="countdown-wrap"><div class="countdown-label">Next challenge drops in</div><div class="countdown-timer" id="countdown-timer"><div class="countdown-unit"><div class="countdown-num" id="cd-d">--</div><div class="countdown-lbl">Days</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-h">--</div><div class="countdown-lbl">Hours</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-m">--</div><div class="countdown-lbl">Mins</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-s">--</div><div class="countdown-lbl">Secs</div></div></div></div>'
   // Render previous uncompleted challenges below
   if(prevUncompleted&&prevUncompleted.length>0){
     let prevHTML='<div style="margin-top:6px">'
@@ -335,7 +339,6 @@ function renderChallenge(el,c,sub,prevUncompleted){
     prevHTML+='</div>'
     el.innerHTML+=prevHTML
   }
-  startCountdown()
 }
 function renderPrevSubmissionArea(pc,pts){
   const inputId='prev-yt-'+pc.id
@@ -444,7 +447,12 @@ async function loadViewerChallenge(){
   el.innerHTML='<div class="loading-center"><div class="spinner"></div></div>'
   try{
     const{data:c}=await sb.from('challenges').select('*').eq('is_active',true).limit(1).maybeSingle()
-    if(!c){el.innerHTML='<p class="text-muted" style="text-align:center;padding-top:30px">No active challenge yet.<br>Check back Monday morning!</p>';return}
+    if(!c){
+      el.innerHTML='<p class="text-muted" style="text-align:center;padding-top:20px;margin-bottom:16px">No active challenge yet.</p>'
+        +'<div class="countdown-box" id="countdown-wrap"><div class="countdown-label">Next challenge drops in</div><div class="countdown-timer" id="countdown-timer"><div class="countdown-unit"><div class="countdown-num" id="cd-d">--</div><div class="countdown-lbl">Days</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-h">--</div><div class="countdown-lbl">Hours</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-m">--</div><div class="countdown-lbl">Mins</div></div><div class="countdown-sep">:</div><div class="countdown-unit"><div class="countdown-num" id="cd-s">--</div><div class="countdown-lbl">Secs</div></div></div></div>'
+      startCountdown()
+      return
+    }
     el.innerHTML='<div class="card"><div class="section-title">'+esc(c.title)+'</div><p class="section-desc">'+esc(c.description)+'</p>'
     +(c.demo_video_url?'<div class="demo-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>Coach demo</div><div class="yt-wrap"><iframe src="'+ytEmbed(extractYouTubeId(c.demo_video_url))+'" allowfullscreen loading="lazy"></iframe></div>':'')
     +'<div class="pill-row"><span class="pill">&#11088; '+c.flat_points+' pts</span>'
@@ -802,12 +810,15 @@ function startCountdown(){
     const wrap=document.getElementById('countdown-wrap')
     if(!wrap){clearInterval(countdownInterval);return}
     const now=new Date()
-    const day=now.getDay(),hour=now.getHours()
-    // Next Monday 9am EST (14:00 UTC)
+    const day=now.getDay()
+    const hour=now.getHours()
+    const min=now.getMinutes()
+    // Next Monday 9am LOCAL time
     const target=new Date(now)
-    const daysUntil=day===1&&hour<14?0:day===1?7:(8-day)%7||7
+    const isPastNineAM=hour>9||(hour===9&&min>0)
+    const daysUntil=day===1&&!isPastNineAM?0:day===1?7:(8-day)%7||7
     target.setDate(now.getDate()+daysUntil)
-    target.setHours(14,0,0,0)
+    target.setHours(9,0,0,0)
     const diff=target-now
     if(diff<=0){document.getElementById('cd-d').textContent='0';document.getElementById('cd-h').textContent='00';document.getElementById('cd-m').textContent='00';document.getElementById('cd-s').textContent='00';return}
     const d=Math.floor(diff/86400000)
