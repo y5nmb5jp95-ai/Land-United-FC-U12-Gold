@@ -299,7 +299,9 @@ async function loadChallenge(){
 }
 function calcWeeksElapsed(challenge){
   const cws=new Date(challenge.created_at)
-  const cday=cws.getDay(); cws.setDate(cws.getDate()-(cday===0?6:cday-1)); cws.setHours(0,0,0,0)
+  const cday=cws.getDay()
+  cws.setDate(cws.getDate()-cday) // go back to Sunday of that week
+  cws.setHours(0,0,0,0)
   return Math.round((getWeekStart()-cws)/(7*24*60*60*1000))
 }
 function calcDecayedPoints(challenge){
@@ -391,7 +393,7 @@ async function submitPrevChallenge(challengeId,points,btn,errId){
 }
 function renderSubmissionArea(sub,c){
   if(!sub){
-    const cws=new Date(c.created_at); const cday=cws.getDay(); cws.setDate(cws.getDate()-(cday===0?6:cday-1)); cws.setHours(0,0,0,0)
+    const cws=new Date(c.created_at); const cday=cws.getDay(); cws.setDate(cws.getDate()-cday); cws.setHours(0,0,0,0)
     const weeksElapsed=Math.round((getWeekStart()-cws)/(7*24*60*60*1000))
     const base=c.flat_points||50
     const weekPts=weeksElapsed===0?base:Math.max(1,Math.round(base/Math.pow(2,weeksElapsed)))
@@ -490,11 +492,11 @@ async function loadDaily(){
 }
 function getWeekStart(){
   const now=new Date()
-  const day=now.getDay()
-  const mon=new Date(now)
-  mon.setDate(now.getDate()-(day===0?6:day-1))
-  mon.setHours(0,0,0,0)
-  return mon
+  const day=now.getDay() // 0=Sun
+  const sun=new Date(now)
+  sun.setDate(now.getDate()-day) // go back to this week's Sunday
+  sun.setHours(0,0,0,0)
+  return sun
 }
 function renderDaily(el,todaySub,totalCompleted,weeklyCount){
   const todayFmt=new Date().toLocaleDateString('en-GB',{weekday:'long',month:'long',day:'numeric'})
@@ -619,8 +621,8 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
   +'<div class="field"><label>Your demo video — paste the YouTube link</label><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="coach-yt-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleCoachYTInput(this.value)" /></div><div id="coach-yt-feedback"></div><div id="coach-yt-preview" style="display:none;margin-top:8px"><div class="coach-yt-wrap"><iframe id="coach-yt-frame" src="" allowfullscreen loading="lazy"></iframe></div><button class="cancel-link" style="margin-top:4px" onclick="clearCoachYT()">&#10005; Remove</button></div></div>'
   +'<div class="field"><label>Daily challenge demo video (permanent — players see this every day)</label><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="daily-demo-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleDailyDemoInput(this.value)" /></div><div id="daily-demo-feedback"></div><div id="daily-demo-preview" style="display:none;margin-top:8px"><div class="coach-yt-wrap"><iframe id="daily-demo-frame" src="" allowfullscreen loading="lazy"></iframe></div></div><button class="btn-secondary" onclick="saveDailyDemo()" style="margin-top:8px">Save demo video</button><div id="daily-demo-toast" style="display:none" class="toast">&#10003; Daily demo video saved!</div></div>'
   +'<div class="admin-label" style="margin-top:4px">Point values</div><div class="pts-grid" style="margin-bottom:12px"><div class="field" style="margin-bottom:0"><label>Completion pts</label><input id="c-flat" type="number" value="50" min="0" /></div><div class="field" style="margin-bottom:0"><label>1st to submit bonus</label><input id="c-d1" type="number" value="20" min="0" /></div><div class="field" style="margin-bottom:0"><label>2nd bonus</label><input id="c-d2" type="number" value="15" min="0" /></div><div class="field" style="margin-bottom:0"><label>3rd bonus</label><input id="c-d3" type="number" value="10" min="0" /></div></div><div class="pts-grid" style="margin-bottom:12px"><div class="field" style="margin-bottom:0"><label>4th bonus</label><input id="c-d4" type="number" value="5" min="0" /></div></div>'
-  +'<div style="display:flex;gap:10px;margin-top:12px"><button class="btn-primary" id="post-btn" onclick="postChallenge(false)" style="margin-top:0">🚀 Publish Now</button><button class="btn-primary" id="schedule-btn" onclick="postChallenge(true)" style="margin-top:0;background:var(--navy-mid);border:1px solid var(--peach);color:var(--white);font-size:16px">📅 Schedule Monday 9am</button></div>'
-  +'<div id="post-toast" style="display:none" class="toast">&#10003; Challenge is live!</div><div id="schedule-toast" style="display:none" class="toast">📅 Scheduled for Monday 9am!</div><div id="post-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div></div></div>'
+  +'<div style="display:flex;gap:10px;margin-top:12px"><button class="btn-primary" id="post-btn" onclick="postChallenge(false)" style="margin-top:0">🚀 Publish Now</button><button class="btn-primary" id="schedule-btn" onclick="postChallenge(true)" style="margin-top:0;background:var(--navy-mid);border:1px solid var(--peach);color:var(--white);font-size:16px">📅 Schedule Sunday 9am</button></div>'
+  +'<div id="post-toast" style="display:none" class="toast">&#10003; Challenge is live!</div><div id="schedule-toast" style="display:none" class="toast">📅 Scheduled for Sunday 9am!</div><div id="post-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div></div></div>'
 
   +'<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Add player to squad</div>'
   +'<div class="card" style="margin-bottom:0"><div class="field"><label>Display name</label><input id="p-name" placeholder="e.g. Marcus Rodriguez" /></div><div class="pts-grid"><div class="field" style="margin-bottom:0"><label>Username</label><input id="p-user" placeholder="marcus_r" autocapitalize="none" /></div><div class="field" style="margin-bottom:0"><label>PIN (4 digits)</label><input id="p-pin" type="password" inputmode="numeric" maxlength="4" placeholder="&#8226;&#8226;&#8226;&#8226;" /></div></div>'
@@ -670,7 +672,7 @@ async function approveSub(subId,type){
       const weekMs=7*24*60*60*1000
       const challengeWeekStart=new Date(challenge.created_at)
       const day=challengeWeekStart.getDay()
-      challengeWeekStart.setDate(challengeWeekStart.getDate()-(day===0?6:day-1))
+      challengeWeekStart.setDate(challengeWeekStart.getDate()-day) // Sunday-based
       challengeWeekStart.setHours(0,0,0,0)
       const submissionWeekStart=getWeekStart()
       const weeksElapsed=Math.round((submissionWeekStart-challengeWeekStart)/weekMs)
@@ -758,9 +760,12 @@ function handleCoachYTInput(val){
 function clearCoachYT(){coachYouTubeId=null;document.getElementById('coach-yt-input').value='';document.getElementById('coach-yt-feedback').innerHTML='';document.getElementById('coach-yt-preview').style.display='none';document.getElementById('coach-yt-frame').src=''}
 
 /* POST CHALLENGE */
-function getNextMondayNineAM(){
-  const now=new Date(),day=now.getDay(),daysUntil=day===1?7:(8-day)%7||7
-  const m=new Date(now); m.setDate(now.getDate()+daysUntil); m.setHours(14,0,0,0); return m.toISOString()
+function getNextSundayNineAM(){
+  const now=new Date(),day=now.getDay()
+  const hour=now.getHours(),min=now.getMinutes()
+  const isPastNineAM=hour>9||(hour===9&&min>0)
+  const daysUntil=day===0&&!isPastNineAM?0:(7-day)%7||7
+  const s=new Date(now); s.setDate(now.getDate()+daysUntil); s.setHours(9,0,0,0); return s.toISOString()
 }
 async function postChallenge(schedule){
   const title=document.getElementById('c-title').value.trim(),desc=document.getElementById('c-desc').value.trim()
@@ -773,7 +778,7 @@ async function postChallenge(schedule){
   try{
     const demoUrl=coachYouTubeId?'https://www.youtube.com/watch?v='+coachYouTubeId:null
     if(schedule){
-      const{error:cErr}=await sb.from('challenges').insert({title,description:desc,demo_video_url:demoUrl,flat_points:flat,day1_bonus:d1,day2_bonus:d2,day3_bonus:d3,day4_bonus:d4,is_active:false,scheduled_for:getNextMondayNineAM()})
+      const{error:cErr}=await sb.from('challenges').insert({title,description:desc,demo_video_url:demoUrl,flat_points:flat,day1_bonus:d1,day2_bonus:d2,day3_bonus:d3,day4_bonus:d4,is_active:false,scheduled_for:getNextSundayNineAM()})
       if(cErr) throw cErr; showToast('schedule-toast')
     }else{
       // Insert new challenge first, THEN deactivate old one — prevents blank state if insert fails
@@ -784,8 +789,8 @@ async function postChallenge(schedule){
       activeChallenge=c; showToast('post-toast')
     }
     document.getElementById('c-title').value='';document.getElementById('c-desc').value='';clearCoachYT()
-    postBtn.disabled=false;schedBtn.disabled=false;postBtn.textContent='🚀 Publish Now';schedBtn.textContent='📅 Schedule Monday 9am'
-  }catch(e){errEl.style.display='block';errEl.textContent='Something went wrong. Try again.';postBtn.disabled=false;schedBtn.disabled=false;postBtn.textContent='🚀 Publish Now';schedBtn.textContent='📅 Schedule Monday 9am';console.error(e)}
+    postBtn.disabled=false;schedBtn.disabled=false;postBtn.textContent='🚀 Publish Now';schedBtn.textContent='📅 Schedule Sunday 9am'
+  }catch(e){errEl.style.display='block';errEl.textContent='Something went wrong. Try again.';postBtn.disabled=false;schedBtn.disabled=false;postBtn.textContent='🚀 Publish Now';schedBtn.textContent='📅 Schedule Sunday 9am';console.error(e)}
 }
 
 /* ADD PLAYER */
@@ -810,13 +815,13 @@ function startCountdown(){
     const wrap=document.getElementById('countdown-wrap')
     if(!wrap){clearInterval(countdownInterval);return}
     const now=new Date()
-    const day=now.getDay()
+    const day=now.getDay() // 0=Sun
     const hour=now.getHours()
     const min=now.getMinutes()
-    // Next Monday 9am LOCAL time
+    // Next Sunday 9am LOCAL time
     const target=new Date(now)
     const isPastNineAM=hour>9||(hour===9&&min>0)
-    const daysUntil=day===1&&!isPastNineAM?0:day===1?7:(8-day)%7||7
+    const daysUntil=day===0&&!isPastNineAM?0:(7-day)%7||7
     target.setDate(now.getDate()+daysUntil)
     target.setHours(9,0,0,0)
     const diff=target-now
@@ -1050,13 +1055,13 @@ function positionBonus(pos,c){
 }
 function getWeekLabel(){
   const now=new Date()
-  const day=now.getDay()
-  const mon=new Date(now)
-  mon.setDate(now.getDate()-(day===0?6:day-1))
-  const sun=new Date(mon)
-  sun.setDate(mon.getDate()+6)
+  const day=now.getDay() // 0=Sun
+  const sun=new Date(now)
+  sun.setDate(now.getDate()-day) // go back to Sunday
+  const sat=new Date(sun)
+  sat.setDate(sun.getDate()+6)
   const fmt=d=>d.toLocaleDateString('en-US',{month:'numeric',day:'numeric'})
-  return fmt(mon)+' – '+fmt(sun)
+  return fmt(sun)+' – '+fmt(sat)
 }
 function esc(str){if(!str) return '';return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function showErr(el,msg){el.style.display='block';el.textContent=msg}
