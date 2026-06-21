@@ -1068,17 +1068,12 @@ function showErr(el,msg){el.style.display='block';el.textContent=msg}
 function showToast(id){const t=document.getElementById(id);if(t){t.style.display='flex';setTimeout(()=>t.style.display='none',3500)}}
 </script>
 <script>
-  // Unregister all old service workers and clear all caches, then re-register fresh
+  // Unregister any existing service workers and clear all caches
   if('serviceWorker' in navigator){
     navigator.serviceWorker.getRegistrations().then(regs => {
       regs.forEach(reg => reg.unregister())
     })
     caches.keys().then(keys => keys.forEach(k => caches.delete(k)))
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js?v=2')
-        .then(reg => console.log('SW registered:', reg.scope))
-        .catch(err => console.log('SW failed:', err))
-    })
   }
 </script>
 </body>
