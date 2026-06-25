@@ -399,21 +399,45 @@ function renderSubmissionArea(sub,c){
     const weekPts=weeksElapsed===0?base:Math.max(1,Math.round(base/Math.pow(2,weeksElapsed)))
     const weekLabel='Week '+(weeksElapsed+1)
     const ptsNote=weeksElapsed===0?'<div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:12px;font-size:13px;color:var(--green)">&#127941; Submitting in <strong>'+weekLabel+'</strong> — worth <strong>'+weekPts+' pts</strong> + position bonus if in top 4</div>':'<div style="background:var(--danger-bg);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:12px;font-size:13px;color:var(--danger)">&#9201; Submitting in <strong>'+weekLabel+'</strong> — worth <strong>'+weekPts+' pts only</strong>, no position bonus</div>'
-    return ptsNote+'<div style="margin-bottom:4px;font-size:13px;font-weight:500">Submit your YouTube link</div><p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload your attempt to YouTube (can be unlisted), then paste the link below.</p><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="yt-link-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleYTInput(this.value)" /></div><div id="yt-feedback"></div><div id="yt-preview" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="yt-preview-frame" src="" allowfullscreen loading="lazy"></iframe></div></div><button class="btn-primary" id="submit-btn" onclick="submitYouTube()" disabled>Submit for Coach Review</button><div id="submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
+    return ptsNote
+      +'<div style="display:flex;gap:8px;margin-bottom:14px">'
+      +'<button id="tab-yt-btn" onclick="switchSubmitTab(\'yt\')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--peach);background:var(--peach);color:var(--navy-dark);font-family:var(--font-d);font-size:16px;cursor:pointer">&#9654; YouTube</button>'
+      +'<button id="tab-upload-btn" onclick="switchSubmitTab(\'upload\')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--peach);background:transparent;color:var(--peach);font-family:var(--font-d);font-size:16px;cursor:pointer">&#128247; Direct Upload</button>'
+      +'</div>'
+      +'<div id="submit-tab-yt">'
+      +'<div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="yt-link-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleYTInput(this.value)" /></div>'
+      +'<div id="yt-feedback"></div>'
+      +'<div id="yt-preview" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="yt-preview-frame" src="" allowfullscreen loading="lazy"></iframe></div></div>'
+      +'<button class="btn-primary" id="submit-btn-yt" onclick="submitYouTube()" disabled>Submit for Coach Review</button>'
+      +'</div>'
+      +'<div id="submit-tab-upload" style="display:none">'
+      +'<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload your video directly from your device.</p>'
+      +'<div class="upload-zone" id="direct-upload-zone" onclick="document.getElementById(\'direct-file-input\').click()">'
+      +'<div style="font-size:28px;margin-bottom:8px">&#128247;</div>'
+      +'<strong style="font-size:13px;color:var(--white);display:block">Tap to choose your video</strong>'
+      +'<p style="font-size:12px;color:var(--muted);margin-top:4px">MP4 or MOV · max 200MB</p>'
+      +'</div>'
+      +'<div id="direct-preview-wrap" style="display:none">'
+      +'<video id="direct-preview-video" controls playsinline style="width:100%;border-radius:var(--radius-sm);margin-bottom:8px;border:1px solid var(--card-border)"></video>'
+      +'<button class="remove-link" onclick="clearDirectUpload()">&#10005; Remove</button>'
+      +'</div>'
+      +'<input id="direct-file-input" type="file" accept="video/*" style="display:none" onchange="handleDirectFileSelect(this)" />'
+      +'<button class="btn-primary" id="submit-btn-upload" onclick="submitDirectVideo()" disabled>Submit for Coach Review</button>'
+      +'<div id="upload-progress" style="display:none;margin-top:10px"><div style="background:var(--card-border);border-radius:4px;height:6px"><div id="upload-progress-bar" style="background:var(--peach);height:6px;border-radius:4px;width:0%;transition:width .3s"></div></div><div id="upload-progress-text" style="font-size:12px;color:var(--muted);margin-top:5px;text-align:center">Uploading...</div></div>'
+      +'</div>'
+      +'<div id="submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
   }
   const bonus=calcBonus(c,sub.submitted_at)
   const fmt=new Date(sub.submitted_at).toLocaleDateString('en-GB',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
   const ytId=extractYouTubeId(sub.video_url)
-  const ytLink=ytId?'<a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer">Watch on YouTube &#8599;</a>':''
+  const ytLink=ytId?'<a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer">Watch on YouTube &#8599;</a>':sub.video_url&&!sub.video_url.includes('youtube')?'<span style="font-size:12px;color:var(--muted)">Direct upload</span>':''
   if(sub.status==='pending') return '<div class="status-box pending"><div class="flex-1"><div style="font-weight:500;font-size:14px">&#9203; Submitted — awaiting coach review</div><div style="font-size:12px;color:var(--muted);margin-top:3px">'+fmt+(bonus>0?' &middot; <span style="color:var(--green)">Position bonus +'+bonus+' pts pending</span>':'')+'</div>'+ytLink+'</div></div>'
   if(sub.status==='approved') return '<div class="status-box approved"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--green)">&#10003; Approved! +'+sub.points_awarded+' pts added</div>'+ytLink+'</div></div>'
   const resubmitBtn='<button id="resubmit-weekly-btn" style="margin-top:10px;padding:8px 14px;background:var(--peach);color:var(--navy-dark);font-family:var(--font-d);font-size:16px;letter-spacing:1px;border:none;border-radius:var(--radius-sm);cursor:pointer">Resubmit Video</button>'
   const html='<div class="status-box rejected"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--danger)">&#10007; Not approved this time</div>'+(sub.rejection_reason?'<div style="font-size:12px;color:var(--muted);margin-top:3px">Coach note: '+esc(sub.rejection_reason)+'</div>':'')+resubmitBtn+'</div></div>'
-  setTimeout(()=>{
-    const btn=document.getElementById('resubmit-weekly-btn')
-    if(btn) btn.addEventListener('click', resubmitWeekly)
-  },0)
+  setTimeout(()=>{ const btn=document.getElementById('resubmit-weekly-btn'); if(btn) btn.addEventListener('click',resubmitWeekly) },0)
   return html
+
 }
 function handleYTInput(val){
   const id=extractYouTubeId(val)
@@ -424,8 +448,8 @@ function handleYTInput(val){
 }
 async function submitYouTube(){
   if(!playerYouTubeId||!activeChallenge) return
-  const btn=document.getElementById('submit-btn'),errEl=document.getElementById('submit-error')
-  btn.disabled=true;btn.textContent='Submitting…';errEl.style.display='none'
+  const btn=document.getElementById('submit-btn-yt')||document.getElementById('submit-btn'),errEl=document.getElementById('submit-error')
+  if(btn){btn.disabled=true;btn.textContent='Submitting…'};if(errEl)errEl.style.display='none'
   try{
     const{data:sub,error}=await sb.from('submissions').insert({challenge_id:activeChallenge.id,player_id:currentSession.user.id,video_url:'https://www.youtube.com/watch?v='+playerYouTubeId,status:'pending',submitted_at:new Date().toISOString()}).select().single()
     if(error) throw error
@@ -511,8 +535,11 @@ function renderDaily(el,todaySub,totalCompleted,weeklyCount){
   +'<p style="font-size:12px;color:var(--muted);text-align:center">Complete 5 sessions any day Mon-Sun to earn the weekly bonus</p>'
 }
 function renderDailyArea(sub,weeklyCount){
-  if(!sub&&weeklyCount>=STREAK_DAYS) return '<div class="status-box approved"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--green)">&#127942; Week complete! You\'ve hit 5 sessions this week.</div><div style="font-size:12px;color:var(--muted);margin-top:3px">Come back next Monday for a fresh week!</div></div></div>'
-  if(!sub) return '<div style="margin-bottom:4px;font-size:13px;font-weight:500">Submit today\'s YouTube link</div><p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload today\'s session to YouTube (can be unlisted), then paste the link below.</p><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="daily-yt-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleDailyYTInput(this.value)" /></div><div id="daily-yt-feedback"></div><div id="daily-yt-preview" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="daily-yt-frame" src="" allowfullscreen loading="lazy"></iframe></div></div><button class="btn-primary" id="daily-submit-btn" onclick="submitDaily()" disabled>Submit Today\'s Session</button><div id="daily-submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
+  if(!sub&&weeklyCount>=STREAK_DAYS) return '<div class="status-box approved"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--green)">&#127942; Week complete! You\'ve hit 5 sessions this week.</div><div style="font-size:12px;color:var(--muted);margin-top:3px">Come back next Sunday for a fresh week!</div></div></div>'
+  if(!sub) return '<div style="display:flex;gap:8px;margin-bottom:14px"><button id="daily-tab-yt-btn" onclick="switchDailySubmitTab(\'yt\')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--peach);background:var(--peach);color:var(--navy-dark);font-family:var(--font-d);font-size:16px;cursor:pointer">&#9654; YouTube Link</button><button id="daily-tab-upload-btn" onclick="switchDailySubmitTab(\'upload\')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--peach);background:transparent;color:var(--peach);font-family:var(--font-d);font-size:16px;cursor:pointer">&#128247; Direct Upload</button></div>'
+  +'<div id="daily-submit-tab-yt"><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="daily-yt-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleDailyYTInput(this.value)" /></div><div id="daily-yt-feedback"></div><div id="daily-yt-preview" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="daily-yt-frame" src="" allowfullscreen loading="lazy"></iframe></div></div><button class="btn-primary" id="daily-submit-btn" onclick="submitDaily()" disabled>Submit Today\'s Session</button></div>'
+  +'<div id="daily-submit-tab-upload" style="display:none"><p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload your session video directly from your device.</p><div class="upload-zone" onclick="document.getElementById(\'daily-file-input\').click()"><div style="font-size:28px;margin-bottom:8px">&#128247;</div><strong style="font-size:13px;color:var(--white);display:block">Tap to choose your video</strong><p style="font-size:12px;color:var(--muted);margin-top:4px">MP4 or MOV · max 200MB</p></div><div id="daily-direct-preview-wrap" style="display:none"><video id="daily-direct-preview" controls playsinline style="width:100%;border-radius:var(--radius-sm);margin-bottom:8px;border:1px solid var(--card-border)"></video><button class="remove-link" onclick="clearDailyDirectUpload()">&#10005; Remove</button></div><input id="daily-file-input" type="file" accept="video/*" style="display:none" onchange="handleDailyFileSelect(this)" /><button class="btn-primary" id="daily-submit-btn-upload" onclick="submitDailyDirect()" disabled>Submit Today\'s Session</button><div id="daily-upload-progress" style="display:none;margin-top:10px"><div style="background:var(--card-border);border-radius:4px;height:6px"><div id="daily-upload-bar" style="background:var(--peach);height:6px;border-radius:4px;width:0%;transition:width .3s"></div></div><div id="daily-upload-text" style="font-size:12px;color:var(--muted);margin-top:5px;text-align:center">Uploading...</div></div></div>'
+  +'<div id="daily-submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
   const fmt=new Date(sub.submitted_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
   const ytId=extractYouTubeId(sub.video_url)
   const ytLink=ytId?'<a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer">Watch on YouTube &#8599;</a>':''
@@ -616,6 +643,19 @@ function buildCoachHTML(weeklyPending,dailyPending,players){
   +'<div class="card" style="margin-bottom:0"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><div><div style="font-size:14px;font-weight:500">Daily submissions</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Automatically off on weekends. Use this to pause mid-week.</div></div><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><span id="daily-toggle-label" style="font-size:12px;color:var(--muted)">Loading...</span><div id="daily-toggle" onclick="toggleDaily()" style="width:44px;height:24px;border-radius:12px;background:var(--card-border);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0"><div id="daily-toggle-thumb" style="width:20px;height:20px;border-radius:50%;background:var(--white);position:absolute;top:2px;left:2px;transition:left .2s"></div></div></label></div></div></div>'
   +'<div id="daily-toggle-toast" style="display:none" class="toast">&#10003; Daily challenge updated!</div></div>'
 
+  +'<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit active challenge</div>'
+  +'<div class="card" style="margin-bottom:0" id="edit-challenge-card">'
+  +(activeChallenge
+    ?'<div class="field"><label>Title</label><input id="edit-title" value="'+esc(activeChallenge.title)+'" /></div>'
+    +'<div class="field"><label>Description</label><textarea id="edit-desc" rows="3">'+esc(activeChallenge.description)+'</textarea></div>'
+    +'<div class="field"><label>Demo video YouTube link</label><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="edit-demo-url" type="url" placeholder="https://youtube.com/watch?v=..." value="'+esc(activeChallenge.demo_video_url||'')+'" /></div></div>'
+    +'<button class="btn-secondary" onclick="saveEditChallenge()">Save changes</button>'
+    +'<div id="edit-challenge-toast" style="display:none" class="toast">&#10003; Challenge updated!</div>'
+    +'<div id="edit-challenge-error" style="display:none;color:var(--danger);font-size:13px;margin-top:8px"></div>'
+    :'<p style="font-size:13px;color:var(--muted)">No active challenge to edit. Post one below.</p>'
+  )
+  +'</div></div>'
+
   +'<div class="admin-section"><div class="admin-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Post new weekly challenge</div>'
   +'<div class="card" style="margin-bottom:0"><div class="field"><label>Challenge title</label><input id="c-title" placeholder="e.g. Juggling Gauntlet" /></div><div class="field"><label>Description</label><textarea id="c-desc" rows="3" placeholder="Describe the challenge clearly..."></textarea></div>'
   +'<div class="field"><label>Your demo video — paste the YouTube link</label><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="coach-yt-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleCoachYTInput(this.value)" /></div><div id="coach-yt-feedback"></div><div id="coach-yt-preview" style="display:none;margin-top:8px"><div class="coach-yt-wrap"><iframe id="coach-yt-frame" src="" allowfullscreen loading="lazy"></iframe></div><button class="cancel-link" style="margin-top:4px" onclick="clearCoachYT()">&#10005; Remove</button></div></div>'
@@ -693,6 +733,16 @@ async function approveSub(subId,type){
       await sb.rpc('add_points',{player_id:playerId,amount:finalPoints})
     }
 
+    // Delete video from storage if it was a direct upload (not YouTube)
+    if(sub.video_url&&!sub.video_url.includes('youtube.com')&&!sub.video_url.includes('youtu.be')){
+      try{
+        // Extract path from public URL
+        const urlParts=sub.video_url.split('/storage/v1/object/public/videos/')
+        if(urlParts[1]){
+          await sb.storage.from('videos').remove([urlParts[1]])
+        }
+      }catch(delErr){ console.log('Could not delete video file:', delErr) }
+    }
     // Check streak bonus for daily
     if(type==='daily'){
       const hasStreak=await checkStreakBonus(playerId)
@@ -991,6 +1041,43 @@ async function toggleDaily(){
   }catch(e){console.error(e);alert('Could not update. Try again.')}
 }
 
+/* EDIT ACTIVE CHALLENGE */
+async function saveEditChallenge(){
+  if(!activeChallenge){ alert('No active challenge to edit.'); return }
+  const title=document.getElementById('edit-title')?.value.trim()
+  const desc=document.getElementById('edit-desc')?.value.trim()
+  const demoUrl=document.getElementById('edit-demo-url')?.value.trim()
+  const errEl=document.getElementById('edit-challenge-error')
+  if(!title||!desc){
+    if(errEl){errEl.style.display='block';errEl.textContent='Title and description cannot be empty.'}
+    return
+  }
+  // Validate YouTube URL if provided
+  let validDemoUrl=null
+  if(demoUrl){
+    const ytId=extractYouTubeId(demoUrl)
+    if(!ytId){
+      if(errEl){errEl.style.display='block';errEl.textContent='Demo video must be a valid YouTube link.'}
+      return
+    }
+    validDemoUrl='https://www.youtube.com/watch?v='+ytId
+  }
+  try{
+    const{error}=await sb.from('challenges').update({
+      title,
+      description:desc,
+      demo_video_url:validDemoUrl||null
+    }).eq('id',activeChallenge.id)
+    if(error) throw error
+    activeChallenge={...activeChallenge,title,description:desc,demo_video_url:validDemoUrl||null}
+    if(errEl) errEl.style.display='none'
+    showToast('edit-challenge-toast')
+  }catch(e){
+    if(errEl){errEl.style.display='block';errEl.textContent='Could not save. Try again.'}
+    console.error(e)
+  }
+}
+
 /* RESET */
 async function resetAllData(){
   const input=document.getElementById('reset-confirm-input')
@@ -1036,6 +1123,156 @@ async function resubmitDaily(subId){
   const{error}=await sb.from('daily_submissions').delete().eq('id',subId)
   if(error){ console.error(error); alert('Could not resubmit. Try again.'); return }
   loadDaily()
+}
+
+/* SUBMIT TAB SWITCHER */
+function switchSubmitTab(tab){
+  const ytDiv=document.getElementById('submit-tab-yt')
+  const uploadDiv=document.getElementById('submit-tab-upload')
+  const ytBtn=document.getElementById('tab-yt-btn')
+  const uploadBtn=document.getElementById('tab-upload-btn')
+  if(tab==='yt'){
+    if(ytDiv) ytDiv.style.display='block'
+    if(uploadDiv) uploadDiv.style.display='none'
+    if(ytBtn){ytBtn.style.background='var(--peach)';ytBtn.style.color='var(--navy-dark)'}
+    if(uploadBtn){uploadBtn.style.background='transparent';uploadBtn.style.color='var(--peach)'}
+  } else {
+    if(ytDiv) ytDiv.style.display='none'
+    if(uploadDiv) uploadDiv.style.display='block'
+    if(ytBtn){ytBtn.style.background='transparent';ytBtn.style.color='var(--peach)'}
+    if(uploadBtn){uploadBtn.style.background='var(--peach)';uploadBtn.style.color='var(--navy-dark)'}
+  }
+}
+function switchDailySubmitTab(tab){
+  const ytDiv=document.getElementById('daily-submit-tab-yt')
+  const uploadDiv=document.getElementById('daily-submit-tab-upload')
+  const ytBtn=document.getElementById('daily-tab-yt-btn')
+  const uploadBtn=document.getElementById('daily-tab-upload-btn')
+  if(tab==='yt'){
+    if(ytDiv) ytDiv.style.display='block'
+    if(uploadDiv) uploadDiv.style.display='none'
+    if(ytBtn){ytBtn.style.background='var(--peach)';ytBtn.style.color='var(--navy-dark)'}
+    if(uploadBtn){uploadBtn.style.background='transparent';uploadBtn.style.color='var(--peach)'}
+  } else {
+    if(ytDiv) ytDiv.style.display='none'
+    if(uploadDiv) uploadDiv.style.display='block'
+    if(ytBtn){ytBtn.style.background='transparent';ytBtn.style.color='var(--peach)'}
+    if(uploadBtn){uploadBtn.style.background='var(--peach)';uploadBtn.style.color='var(--navy-dark)'}
+  }
+}
+
+/* DIRECT VIDEO UPLOAD — WEEKLY */
+let directVideoFile=null
+function handleDirectFileSelect(input){
+  const f=input.files?.[0]; if(!f) return
+  directVideoFile=f
+  const zone=document.getElementById('direct-upload-zone')
+  const preview=document.getElementById('direct-preview-wrap')
+  const video=document.getElementById('direct-preview-video')
+  if(zone) zone.style.display='none'
+  if(preview) preview.style.display='block'
+  if(video) video.src=URL.createObjectURL(f)
+  const btn=document.getElementById('submit-btn-upload')
+  if(btn) btn.disabled=false
+}
+function clearDirectUpload(){
+  directVideoFile=null
+  const zone=document.getElementById('direct-upload-zone')
+  const preview=document.getElementById('direct-preview-wrap')
+  const video=document.getElementById('direct-preview-video')
+  const btn=document.getElementById('submit-btn-upload')
+  const input=document.getElementById('direct-file-input')
+  if(zone) zone.style.display='block'
+  if(preview) preview.style.display='none'
+  if(video) video.src=''
+  if(btn) btn.disabled=true
+  if(input) input.value=''
+}
+async function submitDirectVideo(){
+  if(!directVideoFile||!activeChallenge) return
+  const btn=document.getElementById('submit-btn-upload')
+  const errEl=document.getElementById('submit-error')
+  const progress=document.getElementById('upload-progress')
+  const bar=document.getElementById('upload-progress-bar')
+  const text=document.getElementById('upload-progress-text')
+  btn.disabled=true; errEl.style.display='none'; progress.style.display='block'
+  try{
+    const ext=directVideoFile.name.split('.').pop()
+    const path='weekly/'+activeChallenge.id+'/'+currentSession.user.id+'-'+Date.now()+'.'+ext
+    bar.style.width='30%'; text.textContent='Uploading video...'
+    const{error:upErr}=await sb.storage.from('videos').upload(path,directVideoFile,{cacheControl:'3600',upsert:false})
+    if(upErr) throw upErr
+    bar.style.width='70%'; text.textContent='Saving submission...'
+    const{data:urlData}=sb.storage.from('videos').getPublicUrl(path)
+    const{data:sub,error:subErr}=await sb.from('submissions').insert({
+      challenge_id:activeChallenge.id, player_id:currentSession.user.id,
+      video_url:urlData.publicUrl, status:'pending', submitted_at:new Date().toISOString()
+    }).select().single()
+    if(subErr) throw subErr
+    bar.style.width='100%'; text.textContent='Done!'
+    directVideoFile=null
+    setTimeout(()=>{ document.getElementById('submission-area').innerHTML=renderSubmissionArea(sub,activeChallenge) },500)
+  }catch(e){
+    errEl.style.display='block'; errEl.textContent='Upload failed. Please try again.'
+    btn.disabled=false; progress.style.display='none'; console.error(e)
+  }
+}
+
+/* DIRECT VIDEO UPLOAD — DAILY */
+let dailyDirectFile=null
+function handleDailyFileSelect(input){
+  const f=input.files?.[0]; if(!f) return
+  dailyDirectFile=f
+  const preview=document.getElementById('daily-direct-preview-wrap')
+  const video=document.getElementById('daily-direct-preview')
+  const zone=input.previousElementSibling
+  if(zone) zone.style.display='none'
+  if(preview) preview.style.display='block'
+  if(video) video.src=URL.createObjectURL(f)
+  const btn=document.getElementById('daily-submit-btn-upload')
+  if(btn) btn.disabled=false
+}
+function clearDailyDirectUpload(){
+  dailyDirectFile=null
+  const preview=document.getElementById('daily-direct-preview-wrap')
+  const video=document.getElementById('daily-direct-preview')
+  const btn=document.getElementById('daily-submit-btn-upload')
+  const input=document.getElementById('daily-file-input')
+  if(preview) preview.style.display='none'
+  if(video) video.src=''
+  if(btn) btn.disabled=true
+  if(input) input.value=''
+}
+async function submitDailyDirect(){
+  if(!dailyDirectFile) return
+  const btn=document.getElementById('daily-submit-btn-upload')
+  const errEl=document.getElementById('daily-submit-error')
+  const progress=document.getElementById('daily-upload-progress')
+  const bar=document.getElementById('daily-upload-bar')
+  const text=document.getElementById('daily-upload-text')
+  btn.disabled=true; errEl.style.display='none'; progress.style.display='block'
+  try{
+    const ext=dailyDirectFile.name.split('.').pop()
+    const today=new Date()
+    const dateStr=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0')
+    const path='daily/'+currentSession.user.id+'-'+Date.now()+'.'+ext
+    bar.style.width='30%'; text.textContent='Uploading video...'
+    const{error:upErr}=await sb.storage.from('videos').upload(path,dailyDirectFile,{cacheControl:'3600',upsert:false})
+    if(upErr) throw upErr
+    bar.style.width='70%'; text.textContent='Saving submission...'
+    const{data:urlData}=sb.storage.from('videos').getPublicUrl(path)
+    const{data:sub,error:subErr}=await sb.from('daily_submissions').insert({
+      player_id:currentSession.user.id, video_url:urlData.publicUrl,
+      status:'pending', submitted_at:new Date().toISOString(), submitted_date:dateStr
+    }).select().single()
+    if(subErr) throw subErr
+    bar.style.width='100%'; text.textContent='Done!'
+    dailyDirectFile=null
+    setTimeout(()=>{ document.getElementById('daily-submission-area').innerHTML=renderDailyArea(sub,0) },500)
+  }catch(e){
+    errEl.style.display='block'; errEl.textContent='Upload failed. Please try again.'
+    btn.disabled=false; progress.style.display='none'; console.error(e)
+  }
 }
 
 /* HELPERS */
