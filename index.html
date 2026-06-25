@@ -400,31 +400,10 @@ function renderSubmissionArea(sub,c){
     const weekLabel='Week '+(weeksElapsed+1)
     const ptsNote=weeksElapsed===0?'<div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:12px;font-size:13px;color:var(--green)">&#127941; Submitting in <strong>'+weekLabel+'</strong> — worth <strong>'+weekPts+' pts</strong> + position bonus if in top 4</div>':'<div style="background:var(--danger-bg);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:12px;font-size:13px;color:var(--danger)">&#9201; Submitting in <strong>'+weekLabel+'</strong> — worth <strong>'+weekPts+' pts only</strong>, no position bonus</div>'
     return ptsNote
-      +'<div style="display:flex;gap:8px;margin-bottom:14px">'
-      +'<button id="tab-yt-btn" onclick="switchSubmitTab(\'yt\')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--peach);background:var(--peach);color:var(--navy-dark);font-family:var(--font-d);font-size:16px;cursor:pointer">&#9654; YouTube</button>'
-      +'<button id="tab-upload-btn" onclick="switchSubmitTab(\'upload\')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--peach);background:transparent;color:var(--peach);font-family:var(--font-d);font-size:16px;cursor:pointer">&#128247; Direct Upload</button>'
-      +'</div>'
-      +'<div id="submit-tab-yt">'
-      +'<div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="yt-link-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleYTInput(this.value)" /></div>'
+      +'<div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="yt-link-input" type="url" placeholder="https://youtube.com/watch?v=... or youtu.be/..." oninput="handleYTInput(this.value)" /></div>'
       +'<div id="yt-feedback"></div>'
       +'<div id="yt-preview" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="yt-preview-frame" src="" allowfullscreen loading="lazy"></iframe></div></div>'
       +'<button class="btn-primary" id="submit-btn-yt" onclick="submitYouTube()" disabled>Submit for Coach Review</button>'
-      +'</div>'
-      +'<div id="submit-tab-upload" style="display:none">'
-      +'<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload your video directly from your device.</p>'
-      +'<div class="upload-zone" id="direct-upload-zone" onclick="document.getElementById(\'direct-file-input\').click()">'
-      +'<div style="font-size:28px;margin-bottom:8px">&#128247;</div>'
-      +'<strong style="font-size:13px;color:var(--white);display:block">Tap to choose your video</strong>'
-      +'<p style="font-size:12px;color:var(--muted);margin-top:4px">MP4 or MOV · max 200MB</p>'
-      +'</div>'
-      +'<div id="direct-preview-wrap" style="display:none">'
-      +'<video id="direct-preview-video" controls playsinline style="width:100%;border-radius:var(--radius-sm);margin-bottom:8px;border:1px solid var(--card-border)"></video>'
-      +'<button class="remove-link" onclick="clearDirectUpload()">&#10005; Remove</button>'
-      +'</div>'
-      +'<input id="direct-file-input" type="file" accept="video/*" style="display:none" onchange="handleDirectFileSelect(this)" />'
-      +'<button class="btn-primary" id="submit-btn-upload" onclick="submitDirectVideo()" disabled>Submit for Coach Review</button>'
-      +'<div id="upload-progress" style="display:none;margin-top:10px"><div style="background:var(--card-border);border-radius:4px;height:6px"><div id="upload-progress-bar" style="background:var(--peach);height:6px;border-radius:4px;width:0%;transition:width .3s"></div></div><div id="upload-progress-text" style="font-size:12px;color:var(--muted);margin-top:5px;text-align:center">Uploading...</div></div>'
-      +'</div>'
       +'<div id="submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
   }
   const bonus=calcBonus(c,sub.submitted_at)
@@ -448,7 +427,7 @@ function handleYTInput(val){
 }
 async function submitYouTube(){
   if(!playerYouTubeId||!activeChallenge) return
-  const btn=document.getElementById('submit-btn-yt')||document.getElementById('submit-btn'),errEl=document.getElementById('submit-error')
+  const btn=document.getElementById('submit-btn-yt'),errEl=document.getElementById('submit-error')
   if(btn){btn.disabled=true;btn.textContent='Submitting…'};if(errEl)errEl.style.display='none'
   try{
     const{data:sub,error}=await sb.from('submissions').insert({challenge_id:activeChallenge.id,player_id:currentSession.user.id,video_url:'https://www.youtube.com/watch?v='+playerYouTubeId,status:'pending',submitted_at:new Date().toISOString()}).select().single()
@@ -536,10 +515,7 @@ function renderDaily(el,todaySub,totalCompleted,weeklyCount){
 }
 function renderDailyArea(sub,weeklyCount){
   if(!sub&&weeklyCount>=STREAK_DAYS) return '<div class="status-box approved"><div class="flex-1"><div style="font-weight:500;font-size:14px;color:var(--green)">&#127942; Week complete! You\'ve hit 5 sessions this week.</div><div style="font-size:12px;color:var(--muted);margin-top:3px">Come back next Sunday for a fresh week!</div></div></div>'
-  if(!sub) return '<div style="display:flex;gap:8px;margin-bottom:14px"><button id="daily-tab-yt-btn" onclick="switchDailySubmitTab(\'yt\')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--peach);background:var(--peach);color:var(--navy-dark);font-family:var(--font-d);font-size:16px;cursor:pointer">&#9654; YouTube Link</button><button id="daily-tab-upload-btn" onclick="switchDailySubmitTab(\'upload\')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--peach);background:transparent;color:var(--peach);font-family:var(--font-d);font-size:16px;cursor:pointer">&#128247; Direct Upload</button></div>'
-  +'<div id="daily-submit-tab-yt"><div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="daily-yt-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleDailyYTInput(this.value)" /></div><div id="daily-yt-feedback"></div><div id="daily-yt-preview" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="daily-yt-frame" src="" allowfullscreen loading="lazy"></iframe></div></div><button class="btn-primary" id="daily-submit-btn" onclick="submitDaily()" disabled>Submit Today\'s Session</button></div>'
-  +'<div id="daily-submit-tab-upload" style="display:none"><p style="font-size:12px;color:var(--muted);margin-bottom:10px">Upload your session video directly from your device.</p><div class="upload-zone" onclick="document.getElementById(\'daily-file-input\').click()"><div style="font-size:28px;margin-bottom:8px">&#128247;</div><strong style="font-size:13px;color:var(--white);display:block">Tap to choose your video</strong><p style="font-size:12px;color:var(--muted);margin-top:4px">MP4 or MOV · max 200MB</p></div><div id="daily-direct-preview-wrap" style="display:none"><video id="daily-direct-preview" controls playsinline style="width:100%;border-radius:var(--radius-sm);margin-bottom:8px;border:1px solid var(--card-border)"></video><button class="remove-link" onclick="clearDailyDirectUpload()">&#10005; Remove</button></div><input id="daily-file-input" type="file" accept="video/*" style="display:none" onchange="handleDailyFileSelect(this)" /><button class="btn-primary" id="daily-submit-btn-upload" onclick="submitDailyDirect()" disabled>Submit Today\'s Session</button><div id="daily-upload-progress" style="display:none;margin-top:10px"><div style="background:var(--card-border);border-radius:4px;height:6px"><div id="daily-upload-bar" style="background:var(--peach);height:6px;border-radius:4px;width:0%;transition:width .3s"></div></div><div id="daily-upload-text" style="font-size:12px;color:var(--muted);margin-top:5px;text-align:center">Uploading...</div></div></div>'
-  +'<div id="daily-submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
+  if(!sub) return '<div class="yt-input-wrap"><span class="yt-icon">&#9654;&#65039;</span><input id="daily-yt-input" type="url" placeholder="https://youtube.com/watch?v=..." oninput="handleDailyYTInput(this.value)" /></div><div id="daily-yt-feedback"></div><div id="daily-yt-preview" style="display:none"><div class="yt-wrap" style="margin-bottom:8px"><iframe id="daily-yt-frame" src="" allowfullscreen loading="lazy"></iframe></div></div><button class="btn-primary" id="daily-submit-btn" onclick="submitDaily()" disabled>Submit Today\'s Session</button><div id="daily-submit-error" style="color:var(--danger);font-size:13px;margin-top:8px;display:none"></div>'
   const fmt=new Date(sub.submitted_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
   const ytId=extractYouTubeId(sub.video_url)
   const ytLink=ytId?'<a class="watch-yt" href="'+sub.video_url+'" target="_blank" rel="noreferrer">Watch on YouTube &#8599;</a>':''
