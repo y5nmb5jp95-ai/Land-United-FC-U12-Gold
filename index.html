@@ -672,12 +672,14 @@ async function approveSub(subId,type){
   try{
     let finalPoints=DAILY_POINTS
     let playerId=null
+    let sub=null
 
     if(type==='daily'){
       // Daily submission — just needs player_id, no challenge_id
-      const{data:sub,error}=await sb.from('daily_submissions').select('player_id').eq('id',subId).single()
-      if(error) throw error
-      playerId=sub.player_id
+      const{data:dailySub,error:dailyErr}=await sb.from('daily_submissions').select('player_id,video_url').eq('id',subId).single()
+      if(dailyErr) throw dailyErr
+      playerId=dailySub.player_id
+      sub={video_url:dailySub.video_url}
       await sb.from('daily_submissions').update({status:'approved',points_awarded:finalPoints,reviewed_at:new Date().toISOString()}).eq('id',subId)
     } else {
       // Weekly submission — needs challenge_id for position bonus
