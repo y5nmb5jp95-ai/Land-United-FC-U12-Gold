@@ -753,10 +753,9 @@ async function approveSub(subId,type){
     }
     // Update current_streak count and check for bonus
     if(type==='daily'){
-      // Count total approved sessions this week for streak display
-      const weekStart=getWeekStart().toISOString().slice(0,10)
-      const{count:weekCount}=await sb.from('daily_submissions').select('*',{count:'exact',head:true}).eq('player_id',playerId).eq('status','approved').gte('submitted_date',weekStart)
-      await sb.from('profiles').update({current_streak:weekCount||0}).eq('id',playerId)
+      // Calculate and store consecutive week streak
+      const weekStreak=await calcWeekStreak(playerId)
+      await sb.from('profiles').update({current_streak:weekStreak}).eq('id',playerId)
       const hasStreak=await checkStreakBonus(playerId)
       if(hasStreak){
         await sb.rpc('add_points',{player_id:playerId,amount:STREAK_BONUS})
