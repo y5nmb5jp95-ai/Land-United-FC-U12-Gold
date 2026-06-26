@@ -683,10 +683,11 @@ async function approveSub(subId,type){
       await sb.from('daily_submissions').update({status:'approved',points_awarded:finalPoints,reviewed_at:new Date().toISOString()}).eq('id',subId)
     } else {
       // Weekly submission — needs challenge_id for position bonus
-      const{data:sub,error}=await sb.from('submissions').select('player_id,challenge_id').eq('id',subId).single()
-      if(error) throw error
-      playerId=sub.player_id
-      const{data:approved}=await sb.from('submissions').select('id').eq('challenge_id',sub.challenge_id).eq('status','approved').order('reviewed_at',{ascending:true})
+      const{data:weeklySub,error:weeklyErr}=await sb.from('submissions').select('player_id,challenge_id,video_url').eq('id',subId).single()
+      if(weeklyErr) throw weeklyErr
+      playerId=weeklySub.player_id
+      sub={video_url:weeklySub.video_url}
+      const{data:approved}=await sb.from('submissions').select('id').eq('challenge_id',weeklySub.challenge_id).eq('status','approved').order('reviewed_at',{ascending:true})
       const pos=approved?approved.length:0
       const{data:challenge}=await sb.from('challenges').select('flat_points,day1_bonus,day2_bonus,day3_bonus,day4_bonus,created_at').eq('id',sub.challenge_id).single()
       // Calculate weeks elapsed since challenge was created (week 0 = same week)
