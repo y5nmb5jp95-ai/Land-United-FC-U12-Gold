@@ -420,9 +420,9 @@ function renderSubmissionArea(sub,c){
 }
 function handleYTInput(val){
   const id=extractYouTubeId(val)
-  const fb=document.getElementById('yt-feedback'),preview=document.getElementById('yt-preview'),frame=document.getElementById('yt-preview-frame'),btn=document.getElementById('submit-btn')
-  if(!val.trim()){fb.innerHTML='';preview.style.display='none';btn.disabled=true;playerYouTubeId=null;return}
-  if(id){playerYouTubeId=id;fb.innerHTML='<div class="yt-valid">&#10003; Link recognised</div>';frame.src=ytEmbed(id);preview.style.display='block';btn.disabled=false}
+  const fb=document.getElementById('yt-feedback'),preview=document.getElementById('yt-preview'),frame=document.getElementById('yt-preview-frame'),btn=document.getElementById('submit-btn-yt')
+  if(!val.trim()){fb.innerHTML='';preview.style.display='none';if(btn)btn.disabled=true;playerYouTubeId=null;return}
+  if(id){playerYouTubeId=id;fb.innerHTML='<div class="yt-valid">&#10003; Link recognised</div>';frame.src=ytEmbed(id);preview.style.display='block';if(btn)btn.disabled=false}
   else{playerYouTubeId=null;fb.innerHTML='<div class="yt-invalid">Not a valid YouTube link.</div>';preview.style.display='none';btn.disabled=true}
 }
 async function submitYouTube(){
