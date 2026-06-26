@@ -689,22 +689,22 @@ async function approveSub(subId,type){
       sub={video_url:weeklySub.video_url}
       const{data:approved}=await sb.from('submissions').select('id').eq('challenge_id',weeklySub.challenge_id).eq('status','approved').order('reviewed_at',{ascending:true})
       const pos=approved?approved.length:0
-      const{data:challenge}=await sb.from('challenges').select('flat_points,day1_bonus,day2_bonus,day3_bonus,day4_bonus,created_at').eq('id',sub.challenge_id).single()
+      const{data:challenge}=await sb.from('challenges').select('flat_points,day1_bonus,day2_bonus,day3_bonus,day4_bonus,created_at').eq('id',weeklySub.challenge_id).maybeSingle()
       // Calculate weeks elapsed since challenge was created (week 0 = same week)
-      const weekMs=7*24*60*60*1000
-      const challengeWeekStart=new Date(challenge.created_at)
-      const day=challengeWeekStart.getDay()
-      challengeWeekStart.setDate(challengeWeekStart.getDate()-day) // Sunday-based
-      challengeWeekStart.setHours(0,0,0,0)
-      const submissionWeekStart=getWeekStart()
-      const weeksElapsed=Math.round((submissionWeekStart-challengeWeekStart)/weekMs)
-      if(weeksElapsed===0){
-        // First week — full points + position bonus
-        finalPoints=(challenge?.flat_points||50)+positionBonus(pos,challenge)
+      if(!challenge){
+        finalPoints=50
       } else {
-        // Subsequent weeks — halved each week, no position bonus
-        const base=challenge?.flat_points||50
-        finalPoints=Math.max(1,Math.round(base/Math.pow(2,weeksElapsed)))
+        const weekMs=7*24*60*60*1000
+        const challengeWeekStart=new Date(challenge.created_at)
+        const cday2=challengeWeekStart.getDay()
+        challengeWeekStart.setDate(challengeWeekStart.getDate()-cday2)
+        challengeWeekStart.setHours(0,0,0,0)
+        const weeksElapsed=Math.round((getWeekStart()-challengeWeekStart)/weekMs)
+        if(weeksElapsed===0){
+          finalPoints=(challenge.flat_points||50)+positionBonus(pos,challenge)
+        } else {
+          finalPoints=Math.max(1,Math.round((challenge.flat_points||50)/Math.pow(2,weeksElapsed)))
+        }
       }
       await sb.from('submissions').update({status:'approved',points_awarded:finalPoints,reviewed_at:new Date().toISOString()}).eq('id',subId)
     }
