@@ -715,16 +715,7 @@ async function approveSub(subId,type){
       await sb.rpc('add_points',{player_id:playerId,amount:finalPoints})
     }
 
-    // Delete video from storage if it was a direct upload (not YouTube)
-    if(sub.video_url&&!sub.video_url.includes('youtube.com')&&!sub.video_url.includes('youtu.be')){
-      try{
-        // Extract path from public URL
-        const urlParts=sub.video_url.split('/storage/v1/object/public/videos/')
-        if(urlParts[1]){
-          await sb.storage.from('videos').remove([urlParts[1]])
-        }
-      }catch(delErr){ console.log('Could not delete video file:', delErr) }
-    }
+
     // Update current_streak count and check for bonus
     if(type==='daily'){
 
